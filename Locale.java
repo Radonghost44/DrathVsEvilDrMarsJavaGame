@@ -1,42 +1,45 @@
 package game;
 
 public class Locale {//
-	   // -- PUBLIC -- 
-	   //
+	// -- PUBLIC --
+	//
 
-	   public Locale(int theId) {
-	      id = theId;
-	   }
-	  
-	   public int getId() {
-	      return id;
-	   }
+	public Locale(int theId) {
+		id = theId;
+	}
 
-	   public String getName() {
-	      return name;
-	   }
-	   public void setName(String value) {
-	      name = value;
-	   }   
-	   
-	   public String getDesc() {
-	      return desc;
-	   }
-	   public void setDesc(String value) {
-	      desc = value;
-	   }
+	public int getId() {
+		return id;
+	}
 
-	   //
-	   // -- PRIVATES -- 
-	   //
-	   private int    id;
-	   private String name;
-	   private String desc;
-	   
-	   //-- To String///
-	   
-	   public String toString () {
-		   return "[Locale object : id="+this.id +"name="+this.name+"desc="+this.desc+"]";
-	   }
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String value) {
+		name = value;
+	}
+
+	public String getDesc() {
+		return desc;
+	}
+
+	public void setDesc(String value) {
+		desc = value;
+	}
+
+	//
+	// -- PRIVATES --
+	//
+	private int id;
+	private String name;
+	private String desc;
+
+	// -- To String///
+
+	public String toString() {
+		return "[Locale object : id=" + this.id + "name=" + this.name + "desc="
+				+ this.desc + "]";
+	}
 
 }

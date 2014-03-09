@@ -4,31 +4,28 @@ public class Item {
 	private int    itemId;
 	   private String itemName;
 	   private String itemDesc;
-       private final boolean tracker=false;  // both of these boolans are used to place items in the invetory and take items form their locales
-       private final boolean inventory=false;
        
        public Item (int theId) {
  	      itemId = theId;
  	   }
  	  
- 	   public int getId() {
+ 	   public int getItemId() {
  	      return itemId;
  	   }
 
- 	   public String getName() {
+ 	   public String getItemName() {
  	      return itemName;
  	   }
- 	   public void setName(String value) {
+ 	   public void setItemName(String value) {
  	      itemName = value;
  	   }   
  	   
- 	   public String getDesc() {
+ 	   public String getItemDesc() {
  	      return itemDesc;
  	   }
- 	   public void setDesc(String value) {
+ 	   public void setItemDesc(String value) {
  	      itemDesc = value;
  	   }
-
        // to string method
  	  public String toString () {
 		   return "[Locale object : id="+this.itemId +"name="+this.itemName+"desc="+this.itemDesc+"]";
