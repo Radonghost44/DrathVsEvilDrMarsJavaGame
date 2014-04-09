@@ -2,7 +2,6 @@ package game;
 
 import java.io.File;
 import java.text.DecimalFormat;
-
 import java.io.FileNotFoundException;
 // Amelia Beckham
 import java.util.Scanner;
@@ -11,15 +10,12 @@ public class game {
 	// Globals
 	public static String goodDir = "";
 	public static final int MAX_LOCALES = 16; // Total number of rooms/locations
-												// we have in the game.
 	public static int currentLocale = 0; // Player starts in locale 0.
-	public static String command; // What the player types as he or she plays
-									// the game.
-	public static int itemToTake;
+	public static String command; // Game commands
+	public static String itemToTake;
 	public static int localInventory = 0;
 	public static boolean stillPlaying = true; // Controls the game loop.
-	public static Locale[] locations; // An uninitialized array of type String.
-										// See init() for initialization.
+	public static Locale[] locations;
 	public static int[][] nav; // An uninitialized array of type int int.
 	public static boolean hasBeen = false; // used to keep track of score
 	public static int score = 5; // score is 5 for a new location
@@ -27,15 +23,16 @@ public class game {
 	public static boolean tookMap = false;
 	public static int numberOfItemsInInventory = 0;
 	public static int numberOfItemsInGame = 21;
-	public static String inventory[] = new String[25];// uses booleans, Item
+	public static String inventory[] = new String[700];// uses booleans, Item
 														// class
 														// to make this work.
-
+	public static int currentLocation;
 	public static int[] inLocale = new int[25];// array that tells where the
 												// item is located
-	public static Item arrayOfItems[];// similar to the array of locales,
-										// location, only this one is for the
-										// items.
+	public static Item[] arrayOfOtherItems = new Item[25];// similar to the
+															// array of locales,
+	// location, only this one is for the
+	// items.
 	public static int totalMoves = 0;
 	public static Money arrayOfMoney[];
 	public static int wallet[] = new int[16];// Is simlar to invetory, but is
@@ -46,9 +43,14 @@ public class game {
 	public static int numberOfMoneyInGame = 16;
 	public static int[] moneyInLocale = new int[16];
 	public static ListofItems lm1 = new ListofItems();
+	public static ListofLocales listForDirs = new ListofLocales();
+	public static Locale locn;
 
 	public static void main(String[] args) {
 		// Make some list items.
+		for (int i = 0; i < 700; i++) {
+			inventory[i] = null;
+		}
 		ListItem item25 = new ListItem();
 		item25.setListItemName("+2 ring");
 		item25.setListItemNameDesc("precious");
@@ -131,33 +133,6 @@ public class game {
 			System.out.println("File not found. " + ex.toString());
 		}
 
-		// inLocale subscript is item number, value is location. Location -1
-		// means player has item
-		inLocale[0] = 1;
-		inLocale[1] = 1;
-		inLocale[2] = 1;
-		inLocale[3] = 1;
-		inLocale[4] = 5;
-		inLocale[5] = 5;
-		inLocale[6] = 5;
-		inLocale[7] = 7;
-		inLocale[8] = 0;
-		inLocale[9] = 2;
-		inLocale[10] = 3;
-		inLocale[11] = 3;
-		inLocale[12] = 4;
-		inLocale[13] = 6;
-		inLocale[14] = 7;
-		inLocale[15] = 8;
-		inLocale[16] = 4;
-		inLocale[17] = 9;
-		inLocale[18] = 9;
-		inLocale[19] = 10;
-		inLocale[20] = 11;
-		inLocale[21] = 12;
-		inLocale[22] = 14;
-		inLocale[23] = 13;
-		inLocale[24] = 15;
 		for (int i = 0; i == MAX_LOCALES - 1; i++) {
 			roomCheck[i] = 0;
 		}
@@ -181,6 +156,7 @@ public class game {
 
 		// Get the game started.
 		init();
+		/* System.out.println(listForDirs); */
 		updateDisplay();
 
 		// Game Loop
@@ -235,262 +211,545 @@ public class game {
 		// items are numbered in the order they were initialized
 
 		// locale 0-- kennel town; //
-		Locale loc0 = new Locale(0);
-		loc0.setName("Kennel Town");
-		loc0.setDesc("You are in a quiet and peaceful neighborhood where various animals live together.");
-		// item 8-- map, found at kennel town //
-		Item item8 = new Item(8);
-		item8.setItemName("Map");
-		item8.setItemDesc("A simple map, a little worn around the edges. Press m to see it");
-		Money Money0 = new Money();
-		Money0.setWorth(25000);
+
+		Locale[] locations = new Locale[16];
+		locations[0] = new Locale();
+		locations[0].setName("Kennel Town");
+		locations[0].setId(0);
+		locations[0]
+				.setDesc("You are in a quiet and peaceful neighborhood where various animals live together.");
+		locations[0].setNewLocaleNorth(3);
+		locations[0].setNewLocaleSouth(4);
+		locations[0].setNewLocaleEast(1);
+		locations[0].setNewLocaleWest(2);
+		locations[0].setNewLocaleUp(-1);
+		locations[0].setNewLocaleDown(-1);
+		locations[0].setNext(null);
+		// item 8-- simple map
+		locations[0].arrayOfItems[0] = new ListItem();
+		locations[0].arrayOfItems[0].setarrayOfItemsName("Map");
+		locations[0].arrayOfItems[0]
+				.setarrayOfItemsDesc("A simple map, a little worn around the edges. Press m to see it");
+		locations[0].arrayOfItems[1] = new ListItem();
+		locations[0].arrayOfItems[1].setarrayOfItemsName(null);
+		locations[0].arrayOfItems[1].setarrayOfItemsDesc(null);
+		locations[0].arrayOfItems[2] = new ListItem();
+		locations[0].arrayOfItems[2].setarrayOfItemsName(null);
+		locations[0].arrayOfItems[2].setarrayOfItemsDesc(null);
+		locations[0].arrayOfItems[3] = new ListItem();
+		locations[0].arrayOfItems[3].setarrayOfItemsName(null);
+		locations[0].arrayOfItems[3].setarrayOfItemsDesc(null);
 
 		// /locale 1-- magick shoppe //
-		ItemStore loc1 = new ItemStore(1);
-		loc1.setName("Magick Shoppe");
-		loc1.setDesc("You are in the town's magic shop. It is made of concrete and sells various magical items. ");
-		Money Money1 = new Money();
-		Money1.setWorth(21120);
+		// loc1-- north
+		locations[1] = new Locale();
+		locations[1].setName("Magick Shoppe");
+		locations[1].setId(1);
+		locations[1]
+				.setDesc("You are in the town's magic shop. It is made of concrete and sells various magical items. ");
+		locations[1].setNewLocaleNorth(12);
+		locations[1].setNewLocaleSouth(5);
+		locations[1].setNewLocaleEast(-1);
+		locations[1].setNewLocaleWest(0);
+		locations[1].setNewLocaleUp(-1);
+		locations[1].setNewLocaleDown(-1);
+		locations[1].arrayOfItems[0] = new ListItem();
+		locations[1].arrayOfItems[0].setarrayOfItemsName(null);
+		locations[1].arrayOfItems[0].setarrayOfItemsDesc(null);
+		locations[1].arrayOfItems[1] = new ListItem();
+		locations[1].arrayOfItems[1].setarrayOfItemsName(null);
+		locations[1].arrayOfItems[1].setarrayOfItemsDesc(null);
+		locations[1].arrayOfItems[2] = new ListItem();
+		locations[1].arrayOfItems[2].setarrayOfItemsName(null);
+		locations[1].arrayOfItems[2].setarrayOfItemsDesc(null);
+		locations[1].arrayOfItems[3] = new ListItem();
+		locations[1].arrayOfItems[3].setarrayOfItemsName(null);
+		locations[1].arrayOfItems[3].setarrayOfItemsDesc(null);
+		locations[1].setNext(null);
+		// magic shop is different form most locs, beacuse it uses a list for
+		// its items, not ArrayofItems.
 
 		// locale 2-- icy cave //
-		Locale loc2 = new Locale(2);
-		loc2.setName("Icy Cave");
-		loc2.setDesc("A deep and cold cave where various wild creatures live");
+		locations[2] = new Locale();
+		locations[2].setName("Icy Cave");
+		locations[2].setId(2);
+		locations[2]
+				.setDesc("A deep and cold cave where various wild creatures live");
+		locations[2].setNewLocaleNorth(11);
+		locations[2].setNewLocaleSouth(6);
+		locations[2].setNewLocaleEast(1);
+		locations[2].setNewLocaleWest(-1);
+		locations[2].setNewLocaleUp(-1);
+		locations[2].setNewLocaleDown(-1);
+		locations[2].setNext(null);
 		// item 9-- icicle of a million colors, found at icey cave //
-		Item item9 = new Item(9);
-		item9.setItemName("Icicle of a Million Colors");
-		item9.setItemDesc("A large icicle that appears to shine several different colors.");
-		Money Money2 = new Money();
-		Money2.setWorth(15000);
+		locations[2].arrayOfItems[0] = new ListItem();
+		locations[2].arrayOfItems[0]
+				.setarrayOfItemsName("Icicle of a Million Colors");
+		locations[2].arrayOfItems[0]
+				.setarrayOfItemsDesc("A large icicle that appears to shine several different colors.");
+		locations[2].arrayOfItems[1] = new ListItem();
+		locations[2].arrayOfItems[1].setarrayOfItemsName(null);
+		locations[2].arrayOfItems[1].setarrayOfItemsDesc(null);
+		locations[2].arrayOfItems[2] = new ListItem();
+		locations[2].arrayOfItems[2].setarrayOfItemsName(null);
+		locations[2].arrayOfItems[2].setarrayOfItemsDesc(null);
+		locations[2].arrayOfItems[3] = new ListItem();
+		locations[2].arrayOfItems[3].setarrayOfItemsName(null);
+		locations[2].arrayOfItems[3].setarrayOfItemsDesc(null);
 
 		// locale 3-- unpleasent meadows //
-		Locale loc3 = new Locale(3);
-		loc3.setName("Unpleasant Meadows");
-		loc3.setDesc("A polluted wasteland where various mutated creatures live ");
+		locations[3] = new Locale();
+		locations[3].setName("Unpleasant Meadows");
+		locations[3].setId(3);
+		locations[3]
+				.setDesc("A polluted wasteland where various mutated creatures live ");
+		locations[3].setNewLocaleNorth(14);
+		locations[3].setNewLocaleSouth(0);
+		locations[3].setNewLocaleEast(12);
+		locations[3].setNewLocaleWest(11);
+		locations[3].setNewLocaleUp(-1);
+		locations[3].setNewLocaleDown(-1);
+		locations[3].setNext(null);
 		// unpleanse meadows has 2 items
 		// item 10-- three headed fish //
-		Item item10 = new Item(10);
-		item10.setItemName("Three Headed Fish");
-		item10.setItemDesc("A dull brown fish that has three heads and a lot of teeth. Quite frightening , actually");
+		locations[3].arrayOfItems[0] = new ListItem();
+		locations[3].arrayOfItems[0].setarrayOfItemsName("Three Headed Fish");
+		locations[3].arrayOfItems[0]
+				.setarrayOfItemsDesc("A dull brown fish that has three heads and a lot of teeth. Quite frightening , actually");
 		// item 11-- tin drum of toxic waste //
-		Item item11 = new Item(11);
-		item11.setItemName("Tin Drum of Toxic Waste");
-		item11.setItemDesc("A drum full of waste from the fission planet. It's pretty nasty stuff");
-		Money Money3 = new Money();
-		Money3.setWorth(77777);
+		locations[3].arrayOfItems[1] = new ListItem();
+		locations[3].arrayOfItems[1]
+				.setarrayOfItemsName("Tin Drum of Toxic Waste");
+		locations[3].arrayOfItems[1]
+				.setarrayOfItemsDesc("A drum full of waste from the fission planet. It's pretty nasty stuff");
+		locations[3].arrayOfItems[2] = new ListItem();
+		locations[3].arrayOfItems[2].setarrayOfItemsName(null);
+		locations[3].arrayOfItems[2].setarrayOfItemsDesc(null);
+		locations[3].arrayOfItems[3] = new ListItem();
+		locations[3].arrayOfItems[3].setarrayOfItemsName(null);
+		locations[3].arrayOfItems[3].setarrayOfItemsDesc(null);
 
 		// locale 4-- catnip city //
-		Locale loc4 = new Locale(4);
-		loc4.setName("Catnip City");
-		loc4.setDesc("A newly restored city. Rumor has it it was built by an ancient society millions of years ago ");
+		locations[4] = new Locale();
+		locations[4].setName("Catnip City");
+		locations[4].setId(4);
+		locations[4]
+				.setDesc("A newly restored city. Rumor has it it was built by an ancient society millions of years ago ");
+		locations[4].setNewLocaleNorth(0);
+		locations[4].setNewLocaleSouth(8);
+		locations[4].setNewLocaleEast(5);
+		locations[4].setNewLocaleWest(6);
+		locations[4].setNewLocaleUp(-1);
+		locations[4].setNewLocaleDown(-1);
+		locations[4].setNext(null);
 		// item 12-- taxi ticket, located at Catnip City //
-		Item item12 = new Item(12);
-		item12.setItemName("Taxi Ticket");
-		item12.setItemDesc("A ticket for one of the bright yellow taxis. ");
-		Money Money4 = new Money();
-		Money4.setWorth(12345);
-
+		locations[4].arrayOfItems[0] = new ListItem();
+		locations[4].arrayOfItems[0].setarrayOfItemsName("Taxi Ticket");
+		locations[4].arrayOfItems[0]
+				.setarrayOfItemsDesc("A ticket for one of the bright yellow taxis. ");
 		// item 16-- album of strange music, found in catnip city //
-		Item item16 = new Item(16);
-		item16.setItemName("Album of Strange Music");
-		item16.setItemDesc("A cd full of music that sounds like drunk dance music, (its kind of hard to describe).");
+		locations[4].arrayOfItems[1] = new ListItem();
+		locations[4].arrayOfItems[1]
+				.setarrayOfItemsName("Album of Strange Music");
+		locations[4].arrayOfItems[1]
+				.setarrayOfItemsDesc("A cd full of music that sounds like drunk dance music, (its kind of hard to describe).");
+		locations[4].arrayOfItems[2] = new ListItem();
+		locations[4].arrayOfItems[2].setarrayOfItemsName(null);
+		locations[4].arrayOfItems[2].setarrayOfItemsDesc(null);
+		locations[4].arrayOfItems[3] = new ListItem();
+		locations[4].arrayOfItems[3].setarrayOfItemsName(null);
+		locations[4].arrayOfItems[3].setarrayOfItemsDesc(null);
 
 		// locale 5-- whittie's space ship dealer //
-		ItemStore loc5 = new ItemStore(5);
-		loc5.setName("Whittie's Space Ship Dealer");
-		loc5.setDesc("A utilitarian building that sells different kinds of space ships  ");
-		Money Money5 = new Money();
-		Money5.setWorth(99999);
+		locations[5] = new Locale();
+		locations[5].setName("Whittie's Space Ship Dealer");
+		locations[5].setId(5);
+		locations[5]
+				.setDesc("A utilitarian building that sells different kinds of space ships  ");
+		locations[5].setNewLocaleNorth(1);
+		locations[5].setNewLocaleSouth(5);
+		locations[5].setNewLocaleEast(-1);
+		locations[5].setNewLocaleWest(4);
+		locations[5].setNewLocaleUp(-1);
+		locations[5].setNewLocaleDown(-1);
+		locations[5].setNext(null);
+
 		// items 3-7 are for whitie's space ship dealer
-
 		// item 4-- Verne Spacemaster //
-		Item item4 = new Item(4);
-		item4.setItemName("Verne Spacemaster");
-		item4.setItemDesc("A silver space ship that looks like a cigar. It has a long point on the front of it and sits on a pair of skis ");
+		locations[5].arrayOfItems[0] = new ListItem();
+		locations[5].arrayOfItems[0].setarrayOfItemsName("Verne Spacemaster");
+		locations[5].arrayOfItems[0]
+				.setarrayOfItemsDesc("A sliver box like spaceship with a navy intior");
 		// item 5-- Anticent Alien //
-		Item item5 = new Item(5);
-		item5.setItemName("Ancient Alien");
-		item5.setItemDesc("A hot pink flying saucer. It has chrome trim around it and a purple interior. In other words, the girliest space ship in existence");
-
+		locations[5].arrayOfItems[1] = new ListItem();
+		locations[5].arrayOfItems[1].setarrayOfItemsName("Ancient Alien");
+		locations[5].arrayOfItems[1]
+				.setarrayOfItemsDesc("A hot pink flying saucer. It has chrome trim around it and a purple interior. In other words, the girliest space ship in existence");
 		// item 6-- Benoynd Infintie //
-		Item item6 = new Item(6);
-		item6.setItemName("Beyond Infinite");
-		item6.setItemDesc("A navy space ship that looks like a box. It has a nice, tan interior in it.");
-
+		locations[5].arrayOfItems[2] = new ListItem();
+		locations[5].arrayOfItems[2].setarrayOfItemsName("Benoynd Infintie");
+		locations[5].arrayOfItems[2]
+				.setarrayOfItemsDesc("A trianglar space ship that is dark purple and has neon yellow intor.");
 		// item 7-- Expermental AIrcraft- Aera 51 edition //
-		Item item7 = new Item(7);
-		item7.setItemName("Experimental Aircraft-Area 51 Edition");
-		item7.setItemDesc("A gold space ship that is shaped like a sword. It has a tiny black cockpit.");
+		locations[5].arrayOfItems[3] = new ListItem();
+		locations[5].arrayOfItems[3]
+				.setarrayOfItemsName("Experimental Aircraft-Area 51 Edition");
+		locations[5].arrayOfItems[3]
+				.setarrayOfItemsDesc("A gold space ship that is shaped like a sword. It has a tiny black cockpit.");
 
 		// locale 6-- vet of horrors //
-		Locale loc6 = new Locale(6);
-		loc6.setName("Vet of Horrors");
-		loc6.setDesc("A hospital that all animals go to. It is run by the smartest and jerkiest computer in the world");
+		locations[6] = new Locale();
+		locations[6].setName("Vet of Horrors");
+		locations[6].setId(6);
+		locations[6]
+				.setDesc("A hospital that all animals go to. It is run by the smartest and jerkiest computer in the world");
+		locations[6].setNewLocaleNorth(2);
+		locations[6].setNewLocaleSouth(7);
+		locations[6].setNewLocaleEast(4);
+		locations[6].setNewLocaleWest(-1);
+		locations[6].setNewLocaleUp(-1);
+		locations[6].setNewLocaleDown(-1);
+		locations[6].setNext(null);
 		// item 13-- srignine of pain killer, located at vet of horrors //
-		Money Money6 = new Money();
-		Money6.setWorth(56000);
-		Item item13 = new Item(13);
-		item13.setItemName("Syringe of Pain Killer");
-		item13.setItemDesc("A Syringe of a powerful pain killer, used to retore health");
+		locations[6].arrayOfItems[0] = new ListItem();
+		locations[6].arrayOfItems[0]
+				.setarrayOfItemsName("Syringe of Pain Killer");
+		locations[6].arrayOfItems[0]
+				.setarrayOfItemsDesc("A Syringe of a powerful pain killer, used to retore health");
+		locations[6].arrayOfItems[1] = new ListItem();
+		locations[6].arrayOfItems[1].setarrayOfItemsName(null);
+		locations[6].arrayOfItems[1].setarrayOfItemsDesc(null);
+		locations[6].arrayOfItems[2] = new ListItem();
+		locations[6].arrayOfItems[2].setarrayOfItemsName(null);
+		locations[6].arrayOfItems[2].setarrayOfItemsDesc(null);
+		locations[6].arrayOfItems[3] = new ListItem();
+		locations[6].arrayOfItems[3].setarrayOfItemsName(null);
+		locations[6].arrayOfItems[3].setarrayOfItemsDesc(null);
 
 		// locale 7-- uncanny valley //
-		Locale loc7 = new Locale(7);
-		loc7.setName("Uncanny Valley");
-		loc7.setDesc("A creepy valley were the clones are rumoured to live ");
-		Money Money7 = new Money();
-		Money7.setWorth(56890);
+		locations[7] = new Locale();
+		locations[7].setName("Uncanny Valley");
+		locations[7].setId(7);
+		locations[7]
+				.setDesc("A creepy valley were the clones are rumoured to live ");
+		locations[7].setNewLocaleNorth(6);
+		locations[7].setNewLocaleSouth(-1);
+		locations[7].setNewLocaleEast(8);
+		locations[7].setNewLocaleWest(10);
+		locations[7].setNewLocaleUp(-1);
+		locations[7].setNewLocaleDown(-1);
+
+		locations[7].setNext(null);
+
 		// item 14--clone paw, located at uncanny valley //
-		Item item14 = new Item(14);
-		item14.setItemName("Clone Paw");
-		item14.setItemDesc("Exactly what it sounds like. Poor clone");
+		locations[7].arrayOfItems[0] = new ListItem();
+		locations[7].arrayOfItems[0].setarrayOfItemsName("Clone Paw");
+		locations[7].arrayOfItems[0]
+				.setarrayOfItemsDesc("Exactly what it sounds like. Poor clone");
+		locations[7].arrayOfItems[1] = new ListItem();
+		locations[7].arrayOfItems[1].setarrayOfItemsName(null);
+		locations[7].arrayOfItems[1].setarrayOfItemsDesc(null);
+		locations[7].arrayOfItems[2] = new ListItem();
+		locations[7].arrayOfItems[2].setarrayOfItemsName(null);
+		locations[7].arrayOfItems[2].setarrayOfItemsDesc(null);
+		locations[7].arrayOfItems[3] = new ListItem();
+		locations[7].arrayOfItems[3].setarrayOfItemsName(null);
+		locations[7].arrayOfItems[3].setarrayOfItemsDesc(null);
 
 		// locale 8-- Draco's Dragon Meat Facotry //
-		Locale loc8 = new Locale(8);
-		loc8.setName("Draco's Dragon Meat Factory");
-		loc8.setDesc("The largest feed lot and slaughterhouse of dragon meat. Famous for its gentle and kind treatment of its livestock ");
-		Money Money8 = new Money();
-		Money8.setWorth(66000);
+		locations[8] = new Locale();
+		locations[8].setName("Draco's Dragon Meat Factory");
+		locations[8].setId(8);
+		locations[8]
+				.setDesc("The largest feed lot and slaughterhouse of dragon meat. Famous for its gentle and kind treatment of its livestock ");
+		locations[8].setNewLocaleNorth(4);
+		locations[8].setNewLocaleSouth(-1);
+		locations[8].setNewLocaleEast(9);
+		locations[8].setNewLocaleWest(7);
+		locations[8].setNewLocaleUp(-1);
+		locations[8].setNewLocaleDown(-1);
+		locations[8].setNext(null);
+
 		// item 15-- drang fang, llocated at dragon meat factory //
-		Item item15 = new Item(15);
-		item15.setItemName("Dragon Fang");
-		item15.setItemDesc("A fang from an old dragon");
+		locations[8].arrayOfItems[0] = new ListItem();
+		locations[8].arrayOfItems[0].setarrayOfItemsName("Dragon Fang");
+		locations[8].arrayOfItems[0]
+				.setarrayOfItemsDesc("A fang from an old dragon");
+		locations[8].arrayOfItems[1] = new ListItem();
+		locations[8].arrayOfItems[1].setarrayOfItemsName(null);
+		locations[8].arrayOfItems[1].setarrayOfItemsDesc(null);
+		locations[8].arrayOfItems[2] = new ListItem();
+		locations[8].arrayOfItems[2].setarrayOfItemsName(null);
+		locations[8].arrayOfItems[2].setarrayOfItemsDesc(null);
+		locations[8].arrayOfItems[3] = new ListItem();
+		locations[8].arrayOfItems[3].setarrayOfItemsName(null);
+		locations[8].arrayOfItems[3].setarrayOfItemsDesc(null);
 
 		// locale 9-- cheesy tourest area //
-		Locale loc9 = new Locale(9);
-		loc9.setName("Cheesy Toureist Area");
-		loc9.setDesc("A tourist trap where tourist can buy cheap gifts for the ride back home");
+		locations[9] = new Locale();
+		locations[9].setName("Cheesy Tourist Area");
+		locations[9].setId(9);
+		locations[9]
+				.setDesc("A tourist trap where tourist can buy cheap gifts for the ride back home");
+		locations[9].setNewLocaleNorth(5);
+		locations[9].setNewLocaleSouth(-1);
+		locations[9].setNewLocaleEast(-1);
+		locations[9].setNewLocaleWest(8);
+		locations[9].setNewLocaleUp(-1);
+		locations[9].setNewLocaleDown(-1);
+		locations[9].setNext(null);
 		// cheesy tourest aera has 2 items
 		// /item 17-- vulgar tee shirt //
-		Money Money9 = new Money();
-		Money9.setWorth(10000);
-		Item item17 = new Item(17);
-		item17.setItemName("Vulgar Tee Shirt");
-		item17.setItemDesc("A tee shirt with something very rude printed on it. ");
-
+		locations[9].arrayOfItems[0] = new ListItem();
+		locations[9].arrayOfItems[0].setarrayOfItemsName("Vulgar Tee Shirt");
+		locations[9].arrayOfItems[0]
+				.setarrayOfItemsDesc("A tee shirt with something very rude printed on it. ");
 		// item 18-- knock off purse //
-		Item item18 = new Item(18);
-		item18.setItemName("Knock-off Purse");
-		item18.setItemDesc("A brightly colored purse that looks almost like a high end purse, but is a 1/16th the price, must be authentic.");
+		locations[9].arrayOfItems[1] = new ListItem();
+		locations[9].arrayOfItems[1].setarrayOfItemsName("Knock-off Purse");
+		locations[9].arrayOfItems[1]
+				.setarrayOfItemsDesc("A brightly colored purse that looks almost like a high end purse, but is a 1/16th the price, must be authentic.");
+		locations[9].arrayOfItems[2] = new ListItem();
+		locations[9].arrayOfItems[2].setarrayOfItemsName(null);
+		locations[9].arrayOfItems[2].setarrayOfItemsDesc(null);
+		locations[9].arrayOfItems[3] = new ListItem();
+		locations[9].arrayOfItems[3].setarrayOfItemsName(null);
+		locations[9].arrayOfItems[3].setarrayOfItemsDesc(null);
 
 		// locale 10-- monturus mountains //
-		Locale loc10 = new Locale(10);
-		loc10.setName("Monstrous Mountains");
-		loc10.setDesc("Mountains so tall, that they appear to reach space ");
-		// item 19-- snow form the top of the world, located at montuus
-		// mountains //
-		Money Money10 = new Money();
-		Money10.setWorth(33450);
-		Item item19 = new Item(19);
-		item19.setItemName("Snow From the Top of the World");
-		item19.setItemDesc("Snow from the top of the monstrous montians. Careful, it will melt");
+		locations[10] = new Locale();
+		locations[10].setName("Monstrous Mountains");
+		locations[10].setId(10);
+		locations[10]
+				.setDesc("Mountains so tall, that they appear to reach space ");
+		locations[10].setNewLocaleNorth(-1);
+		locations[10].setNewLocaleSouth(-1);
+		locations[10].setNewLocaleEast(7);
+		locations[10].setNewLocaleWest(-1);
+		locations[10].setNewLocaleUp(-1);
+		locations[10].setNewLocaleDown(-1);
+		locations[10].setNext(null);
+		// item 19-- snow form the top of the world
+		locations[10].arrayOfItems[0] = new ListItem();
+		locations[10].arrayOfItems[0]
+				.setarrayOfItemsName("Snow From the Top of the World");
+		locations[10].arrayOfItems[0]
+				.setarrayOfItemsDesc("Snow from the top of the monstrous montians. Careful, it will melt");
+		locations[10].arrayOfItems[1] = new ListItem();
+		locations[10].arrayOfItems[1].setarrayOfItemsName(null);
+		locations[10].arrayOfItems[1].setarrayOfItemsDesc(null);
+		locations[10].arrayOfItems[2] = new ListItem();
+		locations[10].arrayOfItems[2].setarrayOfItemsName(null);
+		locations[10].arrayOfItems[2].setarrayOfItemsDesc(null);
+		locations[10].arrayOfItems[3] = new ListItem();
+		locations[10].arrayOfItems[3].setarrayOfItemsName(null);
+		locations[10].arrayOfItems[3].setarrayOfItemsDesc(null);
 
 		// locale 11-- abanded delviment //
-		Locale loc11 = new Locale(11);
-		loc11.setName("Abandoned Development");
-		loc11.setDesc("A development that was abandoned for finanical reasons. It is overtaken by weeds");
+		locations[11] = new Locale();
+		locations[11].setName("Abandoned Development");
+		locations[11].setId(11);
+		locations[11]
+				.setDesc("A development that was abandoned for finanical reasons. It is overtaken by weeds");
+		locations[11].setNewLocaleNorth(-1);
+		locations[11].setNewLocaleSouth(2);
+		locations[11].setNewLocaleEast(3);
+		locations[11].setNewLocaleWest(-1);
+		locations[11].setNewLocaleUp(13);
+		locations[11].setNewLocaleDown(-1);
+		locations[11].setNext(null);
 		// item 20-- door knob, located at abanoded delvement //
-		Money Money11 = new Money();
-		Money11.setWorth(15200);
-		Item item20 = new Item(20);
-		item20.setItemName("Door Knob");
-		item20.setItemDesc("A bronze door knob that was on a trailer");
+		locations[11].arrayOfItems[0] = new ListItem();
+		locations[11].arrayOfItems[0].setarrayOfItemsName("Door Knob");
+		locations[11].arrayOfItems[0]
+				.setarrayOfItemsDesc("A bronze door knob that was on a trailer");
+		locations[11].arrayOfItems[1] = new ListItem();
+		locations[11].arrayOfItems[1].setarrayOfItemsName(null);
+		locations[11].arrayOfItems[1].setarrayOfItemsDesc(null);
+		locations[11].arrayOfItems[2] = new ListItem();
+		locations[11].arrayOfItems[2].setarrayOfItemsName(null);
+		locations[11].arrayOfItems[2].setarrayOfItemsDesc(null);
+		locations[11].arrayOfItems[3] = new ListItem();
+		locations[11].arrayOfItems[3].setarrayOfItemsName(null);
+		locations[11].arrayOfItems[3].setarrayOfItemsDesc(null);
 
 		// locale 12-- rusty dungeon //
-		Locale loc12 = new Locale(12);
-		loc12.setName("Rusty Dungeon");
-		loc12.setDesc("A dungeon that was once used for dungoneers to practice. Now, only the geekiest of animals hang out here ");
+		locations[12] = new Locale();
+		locations[12].setName("Rusty Dungeon");
+		locations[12].setId(12);
+		locations[12]
+				.setDesc("A dungeon that was once used for dungoneers to practice. Now, only the geekiest of animals hang out here ");
+		locations[12].setNewLocaleNorth(-1);
+		locations[12].setNewLocaleSouth(1);
+		locations[12].setNewLocaleEast(-1);
+		locations[12].setNewLocaleWest(3);
+		locations[12].setNewLocaleUp(15);
+		locations[12].setNewLocaleDown(-1);
+		locations[12].setNext(null);
 		// item 21-- rusty key, located at therusty dungeon //
-		Money Money12 = new Money();
-		Money12.setWorth(89741);
-		Item item21 = new Item(21);
-		item21.setItemName("Rusty Key");
-		item21.setItemDesc("A key that is rusty, it can unlock the door to all secrets, or somthing neat like that.");
+		locations[12].arrayOfItems[0] = new ListItem();
+		locations[12].arrayOfItems[0].setarrayOfItemsName("Rusty Key");
+		locations[12].arrayOfItems[0]
+				.setarrayOfItemsDesc("A key that is rusty, it can unlock the door to all secrets, or somthing neat like that.");
+		locations[12].arrayOfItems[1] = new ListItem();
+		locations[12].arrayOfItems[1].setarrayOfItemsName(null);
+		locations[12].arrayOfItems[1].setarrayOfItemsDesc(null);
+		locations[12].arrayOfItems[2] = new ListItem();
+		locations[12].arrayOfItems[2].setarrayOfItemsName(null);
+		locations[12].arrayOfItems[2].setarrayOfItemsDesc(null);
+		locations[12].arrayOfItems[3] = new ListItem();
+		locations[12].arrayOfItems[3].setarrayOfItemsName(null);
+		locations[12].arrayOfItems[3].setarrayOfItemsDesc(null);
 
 		// locale 13-- outer outer space //
-		Locale loc13 = new Locale(13);
-		loc13.setName("Outer Outer Space");
-		loc13.setDesc("The space that lies just outside of the multiverse ");
-		// item 23-- comet dust form the nth dimsion, found it outer, outer
-		// space //
-		Money Money13 = new Money();
-		Money13.setWorth(10258);
-		Item item23 = new Item(23);
-		item23.setItemName("Comet Dust From the nth Dimenson");
-		item23.setItemDesc("Comet dust of the other universe. It is near priceless");
+		locations[13] = new Locale();
+		locations[13].setName("Outer Outer Space");
+		locations[13].setId(13);
+		locations[13]
+				.setDesc("The space that lies just outside of the multiverse ");
+		locations[13].setNewLocaleNorth(-1);
+		locations[13].setNewLocaleSouth(-1);
+		locations[13].setNewLocaleEast(-1);
+		locations[13].setNewLocaleWest(-1);
+		locations[13].setNewLocaleUp(-1);
+		locations[13].setNewLocaleDown(11);
+		locations[13].setNext(null);
+		// item 23-- comet dust form the nth dimsion,/
+		locations[13].arrayOfItems[0] = new ListItem();
+		locations[13].arrayOfItems[0]
+				.setarrayOfItemsName("Comet Dust From the nth Dimension");
+		locations[13].arrayOfItems[0]
+				.setarrayOfItemsDesc("Comet dust of the other universe. It is near priceless");
+		locations[13].arrayOfItems[1] = new ListItem();
+		locations[13].arrayOfItems[1].setarrayOfItemsName(null);
+		locations[13].arrayOfItems[1].setarrayOfItemsDesc(null);
+		locations[13].arrayOfItems[2] = new ListItem();
+		locations[13].arrayOfItems[2].setarrayOfItemsName(null);
+		locations[13].arrayOfItems[2].setarrayOfItemsDesc(null);
+		locations[13].arrayOfItems[3] = new ListItem();
+		locations[13].arrayOfItems[3].setarrayOfItemsName(null);
+		locations[13].arrayOfItems[3].setarrayOfItemsDesc(null);
 
 		// locale 14-- crashed space ship //
-		Locale loc14 = new Locale(14);
-		loc14.setName("Crashed Space Ship");
-		loc14.setDesc("A space ship that crashed after hitting a meteor while landing. Luckily everybody was ok ");
-		Money Money14 = new Money();
-		Money14.setWorth(35678);
-		// item 22- bent up enigine, located at the crashed space ship //
-		Item item22 = new Item(22);
-		item22.setItemName("Beat Up Engine");
-		item22.setItemDesc("A beat up engine from the crashed space ship. Still seems to work");
+		locations[14] = new Locale();
+		locations[14].setName("Crashed Space Ship");
+		locations[14].setId(14);
+		locations[14]
+				.setDesc("A space ship that crashed after hitting a meteor while landing. Luckily everybody was ok ");
+		locations[14].setNewLocaleNorth(-1);
+		locations[14].setNewLocaleSouth(3);
+		locations[14].setNewLocaleEast(-1);
+		locations[14].setNewLocaleWest(-1);
+		locations[14].setNewLocaleUp(-1);
+		locations[14].setNewLocaleDown(-1);
+		locations[14].setNext(null);
+
+		// item 22- bent up enigine //
+		locations[14].arrayOfItems[0] = new ListItem();
+		locations[14].arrayOfItems[0].setarrayOfItemsName("Beat Up Engine");
+		locations[14].arrayOfItems[0]
+				.setarrayOfItemsDesc("A beat up engine from the crashed space ship. Still seems to work");
+		locations[14].arrayOfItems[1] = new ListItem();
+		locations[14].arrayOfItems[1].setarrayOfItemsName(null);
+		locations[14].arrayOfItems[1].setarrayOfItemsDesc(null);
+		locations[14].arrayOfItems[2] = new ListItem();
+		locations[14].arrayOfItems[2].setarrayOfItemsName(null);
+		locations[14].arrayOfItems[2].setarrayOfItemsDesc(null);
+		locations[14].arrayOfItems[3] = new ListItem();
+		locations[14].arrayOfItems[3].setarrayOfItemsName(null);
+		locations[14].arrayOfItems[3].setarrayOfItemsDesc(null);
 
 		// locale 15-- not at all evil blip //
-		Locale loc15 = new Locale(15);
-		loc15.setName("Not at all Evil Blimp");
-		loc15.setDesc("Dr Mars' blimp, the one that he is using to abduct random animals to make them work for his company. Biggo Stocks. Nothing sinister here. ");
-		Money Money15 = new Money();
-		Money15.setWorth(65789);
-		// item 24-- dont push me button, located at the not at all evil blimp
-		// //
-		Item item24 = new Item(24);
-		item24.setItemName("Dont Push Me Button");
-		item24.setItemDesc("A big red button, that says dont push in big, black letters.");
+		locations[15] = new Locale();
+		locations[15].setName("Not at all Evil Blimp");
+		locations[15].setId(15);
+		locations[15]
+				.setDesc("Dr Mars' blimp, the one that he is using to abduct random animals to make them work for his company. Biggo Stocks. Nothing sinister here. ");
+		locations[15].setNewLocaleNorth(-1);
+		locations[15].setNewLocaleSouth(-1);
+		locations[15].setNewLocaleEast(-1);
+		locations[15].setNewLocaleWest(-1);
+		locations[15].setNewLocaleUp(-1);
+		locations[15].setNewLocaleDown(12);
+		locations[15].setNext(null);
 
-		// now for the array of items, to store for invetory and items locale
-		arrayOfItems = new Item[21];
-		arrayOfItems[0] = item4;// item4-7 are in space ship dealer
-		arrayOfItems[1] = item5;
-		arrayOfItems[2] = item6;
-		arrayOfItems[3] = item7;
-		arrayOfItems[4] = item8;// item 8 is in kennel town
-		arrayOfItems[5] = item9;// item 9 is in the icy cave
-		arrayOfItems[6] = item10;// item10-11 are in the unpleasent meadows
-		arrayOfItems[7] = item11;
-		arrayOfItems[8] = item12;// item 12 is in catnip city
-		arrayOfItems[9] = item13;// item 13 is in the vet of horrors
-		arrayOfItems[10] = item14;// item 14 is in the uncanny valley
-		arrayOfItems[11] = item15;// item 15 is in the dragon meat factory
-		arrayOfItems[12] = item16;// item 16 is in catnip city(was numbered
-									// this// way beacause I had a duplicate
-									// item.)
-		arrayOfItems[13] = item17;// item 17-18 are in the cheesey tourset aera
-		arrayOfItems[14] = item18;
-		arrayOfItems[15] = item19;// item 19 is in the monturus mountains
-		arrayOfItems[16] = item20;// item 20 is in the abanded delvement
-		arrayOfItems[17] = item21;// item 21 is in the rusty dungeon
-		arrayOfItems[18] = item22;// item 22 is in the crashed space ship
-		arrayOfItems[19] = item23;// item 23 is in outer outer space
-		arrayOfItems[20] = item24;// item 24 is in the evil blimp
+		// item 24-- dont push me button
+		locations[15].arrayOfItems[0] = new ListItem();
+		locations[15].arrayOfItems[0]
+				.setarrayOfItemsName("Don't Push Me Button");
+		locations[15].arrayOfItems[0]
+				.setarrayOfItemsDesc("A big red button, that says dont push in big, black letters.");
+		locations[15].arrayOfItems[1] = new ListItem();
+		locations[15].arrayOfItems[1].setarrayOfItemsName(null);
+		locations[15].arrayOfItems[1].setarrayOfItemsDesc(null);
+		locations[15].arrayOfItems[2] = new ListItem();
+		locations[15].arrayOfItems[2].setarrayOfItemsName(null);
+		locations[15].arrayOfItems[2].setarrayOfItemsDesc(null);
+		locations[15].arrayOfItems[3] = new ListItem();
+		locations[15].arrayOfItems[3].setarrayOfItemsName(null);
+		locations[15].arrayOfItems[3].setarrayOfItemsDesc(null);
 
-		// array of locales to store for nav
-		locations = new Locale[16];
-		locations[2] = loc2; // <-w
-		locations[0] = loc0; // center of map
-		locations[1] = loc1;// e->
-		locations[3] = loc3;
-		locations[4] = loc4;
-		locations[5] = loc5;
-		locations[6] = loc6;
-		locations[7] = loc7;
-		locations[8] = loc8;
-		locations[9] = loc9;
-		locations[10] = loc10;
-		locations[11] = loc11;
-		locations[12] = loc12;
-		locations[13] = loc13;
-		locations[14] = loc14;
-		locations[15] = loc15;
+		// listForDirs.setDirName("direction list");
+		// listForDirs.setDirDesc("these are the directions for movenemt");
 
-		// array money has the money in it
+		/*--------------------------------------------------------------------------------*/
+
+		// list of locales and their directions
+		listForDirs.add(locations[0]);
+		listForDirs.add(locations[1]);
+		listForDirs.add(locations[2]);
+		listForDirs.add(locations[3]);
+		listForDirs.add(locations[4]);
+		listForDirs.add(locations[5]);
+		listForDirs.add(locations[6]);
+		listForDirs.add(locations[7]);
+		listForDirs.add(locations[8]);
+		listForDirs.add(locations[9]);
+		listForDirs.add(locations[10]);
+		listForDirs.add(locations[11]);
+		listForDirs.add(locations[12]);
+		listForDirs.add(locations[13]);
+		listForDirs.add(locations[14]);
+		listForDirs.add(locations[15]);
+
+		// array money has the money in it */
 		arrayOfMoney = new Money[16];
-		arrayOfMoney[2] = Money2; // <-w
-		arrayOfMoney[0] = Money0; // center of map
-		arrayOfMoney[1] = Money1;// e->
+		Money Money0 = new Money();
+		Money0.setWorth(12453);
+		Money Money1 = new Money();
+		Money1.setWorth(50032);
+		Money Money2 = new Money();
+		Money2.setWorth(2642);
+		Money Money3 = new Money();
+		Money3.setWorth(12386);
+		Money Money4 = new Money();
+		Money4.setWorth(500);
+		Money Money5 = new Money();
+		Money5.setWorth(795);
+		Money Money6 = new Money();
+		Money6.setWorth(1200);
+		Money Money7 = new Money();
+		Money7.setWorth(10000);
+		Money Money8 = new Money();
+		Money8.setWorth(20);
+		Money Money9 = new Money();
+		Money9.setWorth(6831);
+		Money Money10 = new Money();
+		Money10.setWorth(7777);
+		Money Money11 = new Money();
+		Money11.setWorth(666);
+		Money Money12 = new Money();
+		Money12.setWorth(10000);
+		Money Money13 = new Money();
+		Money13.setWorth(25000);
+		Money Money14 = new Money();
+		Money14.setWorth(535);
+		Money Money15 = new Money();
+		Money15.setWorth(25000);
+		arrayOfMoney[0] = Money0;
+		arrayOfMoney[1] = Money1;
+		arrayOfMoney[2] = Money2;
 		arrayOfMoney[3] = Money3;
 		arrayOfMoney[4] = Money4;
 		arrayOfMoney[5] = Money5;
@@ -505,26 +764,282 @@ public class game {
 		arrayOfMoney[14] = Money14;
 		arrayOfMoney[15] = Money15;
 
-		// Set up the navigation matrix.
-		nav = new int[][] {
-		/* N S E W U D */// --U stands for UP and D stands for Down
-				/* 0 1 2 3 4 5 */
-				/* nav[0] for loc 0 */{ 3, 4, 1, 2, -1, -1 },
-				/* nav[1] for loc 1 */{ 12, 5, -1, 0, -1, -1 },
-				/* nav[2] for loc 2 */{ 11, 6, 0, -1, -1, -1 },
-				/* nav[3] for loc 3 */{ 14, 0, 12, 11, -1, -1 },
-				/* nav[4] for loc 4 */{ 0, 8, 5, 6, -1, -1 },
-				/* nav[5] for loc 5 */{ 1, 9, -1, 4, -1, -1 },
-				/* nav[6] for loc 6 */{ 2, 7, 4, -1, -1, -1 },
-				/* nav[7] for loc 7 */{ 6, -1, 8, 10, -1, -1 },
-				/* nav[8] for loc 8 */{ 4, -1, 9, 7, -1, -1 },
-				/* nav[9] for loc 9 */{ 5, -1, -1, 8, -1, -1 },
-				/* nav[10] for loc 10 */{ -1, -1, 7, -1, -1, -1 },
-				/* nav[11] for loc 11 */{ -1, 2, 3, -1, 13, -1 },
-				/* nav[12] for loc 12 */{ -1, 1, -1, 3, 15, -1 },
-				/* nav[13] for loc 13 */{ -1, -1, -1, -1, -1, 11 },
-				/* nav[14] for loc 14 */{ -1, 3, -1, -1, -1, -1 },
-				/* nav[15] for loc 15 */{ -1, -1, -1, -1, -1, 12 } };
+	}
+
+	/*--------------------------------------------------------------------------------*/
+	private static int sequentialSearchLocaleDown(ListofLocales listForDirs,
+			int currentLocation) {
+		int retVal = -1;
+		int counter = 0;
+		Locale currentItem;
+		currentItem = listForDirs.getDirHead();
+		boolean isFound = false;
+		while ((!isFound) && (currentItem != null)) {
+			counter = counter + 1;
+			if ((currentItem.getId() == currentLocation)) {
+				isFound = true;
+				retVal = currentItem.getNewLocaleDown();
+			} else {
+				currentItem = currentItem.getNext();
+			}
+		}
+		if (isFound) {
+			return retVal;
+		}
+		return retVal;
+	}
+
+	/*--------------------------------------------------------------------------------*/
+	private static int sequentialSearchLocaleUp(ListofLocales listForDirs,
+			int currentLocation) {
+		int retVal = -1;
+		int counter = 0;
+		Locale currentItem;
+		currentItem = listForDirs.getDirHead();
+		boolean isFound = false;
+		while ((!isFound) && (currentItem != null)) {
+			counter = counter + 1;
+			if ((currentItem.getId() == currentLocation)) {
+				isFound = true;
+				retVal = currentItem.getNewLocaleUp();
+			} else {
+				currentItem = currentItem.getNext();
+			}
+		}
+		if (isFound) {
+			return retVal;
+		}
+		return retVal;
+	}
+
+	/*--------------------------------------------------------------------------------*/
+	private static int sequentialSearchLocaleWest(ListofLocales listForDirs,
+			int currentLocation) {
+		int retVal = -1;
+		int counter = 0;
+		Locale currentItem;
+		currentItem = listForDirs.getDirHead();
+		boolean isFound = false;
+		while ((!isFound) && (currentItem != null)) {
+			counter = counter + 1;
+			if ((currentItem.getId() == currentLocation)) {
+				isFound = true;
+				retVal = currentItem.getNewLocaleWest();
+			} else {
+				currentItem = currentItem.getNext();
+			}
+		}
+		if (isFound) {
+			return retVal;
+		}
+		return retVal;
+	}
+
+	/*--------------------------------------------------------------------------------*/
+	private static int sequentialSearchLocaleEast(ListofLocales listForDirs,
+			int currentLocation) {
+		int retVal = -1;
+		int counter = 0;
+		Locale currentItem;
+		currentItem = listForDirs.getDirHead();
+		boolean isFound = false;
+		while ((!isFound) && (currentItem != null)) {
+			counter = counter + 1;
+			if ((currentItem.getId() == currentLocation)) {
+				isFound = true;
+				retVal = currentItem.getNewLocaleEast();
+			} else {
+				currentItem = currentItem.getNext();
+			}
+		}
+		if (isFound) {
+			return retVal;
+		}
+		return retVal;
+	}
+
+	/*--------------------------------------------------------------------------------*/
+	private static int sequentialSearchLocaleSouth(ListofLocales listForDirs,
+			int currentLocation) {
+		int retVal = -1;
+		int counter = 0;
+		Locale currentItem;
+		currentItem = listForDirs.getDirHead();
+		boolean isFound = false;
+		while ((!isFound) && (currentItem != null)) {
+			counter = counter + 1;
+			if ((currentItem.getId() == currentLocation)) {
+				isFound = true;
+				retVal = currentItem.getNewLocaleSouth();
+			} else {
+				currentItem = currentItem.getNext();
+			}
+		}
+		if (isFound) {
+			return retVal;
+		}
+		return retVal;
+	}
+
+	/*--------------------------------------------------------------------------------*/
+	private static int sequentialSearchLocaleNorth(ListofLocales listForDirs,
+			int currentLocation) {
+		int retVal = -1;
+		int counter = 0;
+		Locale currentItem = new Locale();
+		currentItem = listForDirs.getDirHead();
+		boolean isFound = false;
+		while ((!isFound) && (currentItem != null)) {
+			counter = counter + 1;
+			if ((currentItem.getId() == currentLocation)) {
+				isFound = true;
+				retVal = currentItem.getNewLocaleNorth();
+			} else {
+				currentItem = currentItem.getNext();
+			}
+		}
+		if (isFound) {
+			return retVal;
+		}
+		return retVal;
+	}
+
+	
+	/*--------------------------------------------------------------------------------*/
+	private static String sequentialSearchLocaleAmeliasItemsForInventory(
+			String itemToTake, ListofLocales listForDirs, int currentLocale) {
+		String retVal = null;
+		int counter = 0;
+		Locale currentItem;
+		currentItem = listForDirs.getDirHead();
+		boolean isFound = false;
+		while ((!isFound) && (currentItem != null)) {
+			counter = counter + 1;
+			if ((currentItem.getId() == currentLocale)) {
+				isFound = true;
+				if (currentItem.getItem0Name() != null) {
+					System.out.println("currentItem.getItem0Name = "  +currentItem.getItem0Name() + " itemToTake = " + itemToTake);
+					if (currentItem.getItem0Name().equalsIgnoreCase(itemToTake)) {
+						retVal = currentItem.getItem0Name();
+					}
+				}
+				if (currentItem.getItem1Name() != null) {
+					if (currentItem.getItem1Name().equalsIgnoreCase(itemToTake)) {
+						retVal = currentItem.getItem1Name();
+					}
+				}
+				if (currentItem.getItem2Name() != null) {
+					if (currentItem.getItem2Name().equalsIgnoreCase(itemToTake)) {
+						retVal = currentItem.getItem2Name();
+					}
+				}
+				if (currentItem.getItem3Name() != null) {
+					if (currentItem.getItem3Name().equalsIgnoreCase(itemToTake)) {
+						retVal = currentItem.getItem3Name();
+					}
+				}
+			} else {
+				currentItem = currentItem.getNext();
+			}
+		}
+		if (!isFound) {
+			System.out.println("That item is not here.");
+		}
+		return retVal;
+	}
+
+	/*--------------------------------------------------------------------------------*/
+	private static String sequentialSearchLocaleAmeliasItems(
+			ListofLocales listForDirs, int currentLocation) {
+		String retVal = "";
+		Locale currentItem;
+		int counter = 0;
+		currentItem = listForDirs.getDirHead();
+		boolean isFound = false;
+		boolean isInInventory = false;
+		while ((!isFound) && (currentItem != null)) {
+			if ((currentItem.getId() == currentLocation)) {
+				isFound = true;
+				isInInventory = false;
+				if (currentItem.getItem0Name() != null) {
+					{
+						for (int i = 0; i < numberOfItemsInInventory + 1; i++) {
+							if ((inventory[i] != null)
+									&& (currentItem.getItem0Name()
+											.equalsIgnoreCase(inventory[i]))) {
+								isInInventory = true;
+							}
+						}
+					}
+					if (isInInventory == false) {
+						counter = counter + 1;
+						retVal = retVal + currentItem.getItem0Name() + ".  "
+								+ currentItem.getItem0Description() + ".\n";
+					}
+				}
+				isInInventory = false;
+				if (currentItem.getItem1Name() != null) {
+					{
+
+						for (int i = 0; i < numberOfItemsInInventory + 1; i++) {
+							if ((inventory[i] != null)
+									&& (currentItem.getItem1Name()
+											.equalsIgnoreCase(inventory[i]))) {
+								isInInventory = true;
+							}
+						}
+					}
+					if (isInInventory == false) {
+						counter = counter + 1;
+						retVal = retVal + currentItem.getItem1Name() + ".  "
+								+ currentItem.getItem1Description() + ".\n";
+					}
+				}
+				isInInventory = false;
+				if (currentItem.getItem2Name() != null) {
+					{
+
+						for (int i = 0; i < numberOfItemsInInventory + 1; i++) {
+							if ((inventory[i] != null)
+									&& (currentItem.getItem2Name()
+											.equalsIgnoreCase(inventory[i]))) {
+								isInInventory = true;
+							}
+						}
+					}
+					if (isInInventory == false) {
+						counter = counter + 1;
+						retVal = retVal + currentItem.getItem2Name() + ".  "
+								+ currentItem.getItem2Description() + ".\n";
+					}
+				}
+				isInInventory = false;
+				if (currentItem.getItem3Name() != null) {
+					{
+
+						for (int i = 0; i < numberOfItemsInInventory + 1; i++) {
+							if ((inventory[i] != null)
+									&& (currentItem.getItem3Name()
+											.equalsIgnoreCase(inventory[i]))) {
+								isInInventory = true;
+							}
+						}
+					}
+					if (isInInventory == false) {
+						counter = counter + 1;
+						retVal = retVal + currentItem.getItem3Name() + ".  "
+								+ currentItem.getItem3Description() + ".\n";
+					}
+				}
+			} else {
+				currentItem = currentItem.getNext();
+			}
+		}
+		if (isFound) {
+			System.out.println("There are " + counter + " item(s) here.");
+			return retVal;
+		}
+		return retVal;
 	}
 
 	/*--------------------------------------------------------------------------------*/
@@ -532,21 +1047,14 @@ public class game {
 		if (totalMoves == 0 && currentLocale == 0) {
 			System.out.println("Darth Vs. The Evil Dr. Mars");
 		}
-		System.out.println(locations[currentLocale].getName());
-		System.out.println(locations[currentLocale].getDesc());
-		validMove();
-		for (int i = 0; i < numberOfItemsInGame; i++) {
-			if (inLocale[i] == currentLocale) {
-				if (currentLocale != 1) {
-					System.out.print("There is a "
-							+ arrayOfItems[i].getItemName() + ". ");
-					System.out.println(arrayOfItems[i].getItemDesc());
-				}
-			}
-		}
+
+		validMove(currentLocale);
+		String tempName = "";
+		tempName = sequentialSearchLocaleAmeliasItems(listForDirs,
+				currentLocale);
+		System.out.println(tempName);
 		System.out.println("There are "
 				+ arrayOfMoney[currentLocale].getWorth() + " Gold Coins here");
-
 	}
 
 	/*--------------------------------------------------------------------------------*/
@@ -557,26 +1065,25 @@ public class game {
 
 	/*--------------------------------------------------------------------------------*/
 	private static void navigate() {
-		final int INVALID = -1;
-		int dir = INVALID; // This will get set to a value > 0 if a direction
-							// command was entered.
+		int newLocation = 0;
+		String dir = "INVALID";
 		if (command.equalsIgnoreCase("north") || command.equalsIgnoreCase("n")) {
-			dir = 0;
+			dir = "n";
 		} else if (command.equalsIgnoreCase("south")
 				|| command.equalsIgnoreCase("s")) {
-			dir = 1;
+			dir = "s";
 		} else if (command.equalsIgnoreCase("east")
 				|| command.equalsIgnoreCase("e")) {
-			dir = 2;
+			dir = "e";
 		} else if (command.equalsIgnoreCase("west")
 				|| command.equalsIgnoreCase("w")) {
-			dir = 3;
+			dir = "w";
 		} else if (command.equalsIgnoreCase("up")
 				|| command.equalsIgnoreCase("u")) {
-			dir = 4;
+			dir = "u";
 		} else if (command.equalsIgnoreCase("down")
 				|| command.equalsIgnoreCase("d")) {
-			dir = 5;
+			dir = "d";
 		} else if (command.equalsIgnoreCase("quit")
 				|| command.equalsIgnoreCase("q")) {
 			quit();
@@ -604,18 +1111,41 @@ public class game {
 		}
 		;
 
-		if (dir > -1) { // This means a dir was set.
+		if (!dir.equalsIgnoreCase("INVALID")) { // This means a dir was set.
 			totalMoves = totalMoves + 1;
-			int newLocation = nav[currentLocale][dir];
-			if (newLocation == INVALID) {
+			if (dir.equalsIgnoreCase("n")) {
+				newLocation = sequentialSearchLocaleNorth(listForDirs,
+						currentLocale);
+			}
+			if (dir.equalsIgnoreCase("s")) {
+				newLocation = sequentialSearchLocaleSouth(listForDirs,
+						currentLocale);
+			}
+			if (dir.equalsIgnoreCase("e")) {
+				newLocation = sequentialSearchLocaleEast(listForDirs,
+						currentLocale);
+			}
+			if (dir.equalsIgnoreCase("w")) {
+				newLocation = sequentialSearchLocaleWest(listForDirs,
+						currentLocale);
+			}
+			if (dir.equalsIgnoreCase("u")) {
+				newLocation = sequentialSearchLocaleUp(listForDirs,
+						currentLocale);
+			}
+			if (dir.equalsIgnoreCase("d")) {
+				newLocation = sequentialSearchLocaleUp(listForDirs,
+						currentLocale);
+			}
+			if (newLocation == -1) {
 				System.out.println("You cannot go that way. Press h for help");
-				validMove();
+				validMove(newLocation);
 			} else {
 				currentLocale = newLocation;
 				totalScore();
 				System.out.println("You have made " + totalMoves + " moves.");
 				achievementRatio();
-				validMove();
+				validMove(newLocation);
 			}
 		}
 	}
@@ -645,44 +1175,20 @@ public class game {
 
 	/*--------------------------------------------------------------------------------*/
 	private static void take() {
-		localInventory = 0;
-		for (int i = 0; i < numberOfItemsInGame; i++) {
-			if (inLocale[i] == currentLocale) {
-				localInventory = localInventory + 1;
+		String takenItem = null;
+		System.out.println("Which item do you wish to take?");
+		
+			Scanner inputReader = new Scanner(System.in);
+			itemToTake = inputReader.nextLine();
+			takenItem = sequentialSearchLocaleAmeliasItemsForInventory(
+					itemToTake, listForDirs, currentLocale);
+			System.out.println("You took the " + itemToTake);
+			if (itemToTake.equalsIgnoreCase("map")) {
+				tookMap = true;
 			}
-		}
-		if (localInventory == 0) {
-			System.out.println("There are no items here to take");
-		}
-
-		else {
-			System.out.println("Which item number do you wish to take?");
-			for (int i = 0; i < numberOfItemsInGame; i++) {
-				if (inLocale[i] == currentLocale) {
-					System.out.println("Item number " + i + ":  "
-							+ arrayOfItems[i].getItemName());
-				}
-			}
-			try {
-				Scanner inputReader = new Scanner(System.in);
-				itemToTake = inputReader.nextInt();
-				if (inLocale[itemToTake] == currentLocale) {
-					System.out.println("You took the "
-							+ arrayOfItems[itemToTake].getItemName());
-					inLocale[itemToTake] = -1;
-					if (itemToTake == 8) {
-						tookMap = true;
-					}
-					inventory[numberOfItemsInInventory] = arrayOfItems[itemToTake]
-							.getItemName();
-					numberOfItemsInInventory = numberOfItemsInInventory + 1;
-				} else {
-					System.out.println("That is not a valid selection.");
-				}
-			} catch (Exception InputMismatchException) {
-				System.out.println("That is not a valid selection.");
-			}
-		}
+			inventory[numberOfItemsInInventory] = takenItem;
+			numberOfItemsInInventory = numberOfItemsInInventory + 1;
+		
 	}
 
 	/*--------------------------------------------------------------------------------*/
@@ -732,6 +1238,7 @@ public class game {
 				coinPurse = coinPurse - purchasePrice;
 				inventory[numberOfItemsInInventory] = itemToBuy;
 				numberOfItemsInInventory = numberOfItemsInInventory + 1;
+				lm1.removeItem(lm1, itemToBuy);
 
 			} else {
 				System.out.println("You don't have enough money to buy that.");
@@ -771,31 +1278,35 @@ public class game {
 	}
 
 	/*--------------------------------------------------------------------------------*/
-	public static void validMove() {
-		for (int i = 0; i < 6; i++) {
-
-			if (nav[currentLocale][i] != -1)
-				switch (i) {
-				case 0:
-					goodDir = goodDir + "north ";
-					break;
-				case 1:
-					goodDir = goodDir + "south ";
-					break;
-				case 2:
-					goodDir = goodDir + "east ";
-					break;
-				case 3:
-					goodDir = goodDir + "west ";
-					break;
-				case 4:
-					goodDir = goodDir + "up ";
-					break;
-				case 5:
-					goodDir = goodDir + "down ";
-					break;
-				}
+	public static void validMove(int currentLocale) {
+		int newLocationTemp = -1;
+		newLocationTemp = sequentialSearchLocaleNorth(listForDirs,
+				currentLocale);
+		if (newLocationTemp != -1) {
+			goodDir = goodDir + "north ";
 		}
+		newLocationTemp = sequentialSearchLocaleSouth(listForDirs,
+				currentLocale);
+		if (newLocationTemp != -1) {
+			goodDir = goodDir + "south ";
+		}
+		newLocationTemp = sequentialSearchLocaleEast(listForDirs, currentLocale);
+		if (newLocationTemp != -1) {
+			goodDir = goodDir + "east ";
+		}
+		newLocationTemp = sequentialSearchLocaleWest(listForDirs, currentLocale);
+		if (newLocationTemp != -1) {
+			goodDir = goodDir + "west";
+		}
+		newLocationTemp = sequentialSearchLocaleUp(listForDirs, currentLocale);
+		if (newLocationTemp != -1) {
+			goodDir = goodDir + "up ";
+		}
+		newLocationTemp = sequentialSearchLocaleDown(listForDirs, currentLocale);
+		if (newLocationTemp != -1) {
+			goodDir = goodDir + "down";
+		}
+
 		System.out.println("You can move in these directions: " + goodDir);
 		goodDir = "";
 	}
