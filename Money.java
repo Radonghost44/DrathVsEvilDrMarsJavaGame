@@ -14,10 +14,4 @@ public class Money {
 	public void setWorth(int value) {
 		worth = value;
 	}
-
-	public double AmountofMoney() {
-		total = total + worth;
-		return total;
-	}
-
 }
