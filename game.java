@@ -8,31 +8,23 @@ import java.util.Scanner;
 
 public class game {
 	// Globals
-	public static String goodDir = "";
+	public static String goodDir = ""; // used
 	public static final int MAX_LOCALES = 16; // Total number of rooms/locations
-	public static int currentLocale = 0; // Player starts in locale 0.
-	public static String command; // Game commands
-	public static String itemToTake;
-	public static int localInventory = 0;
-	public static boolean stillPlaying = true; // Controls the game loop.
-	public static Locale[] locations;
-	public static int[][] nav; // An uninitialized array of type int int.
-	public static boolean hasBeen = false; // used to keep track of score
-	public static int score = 5; // score is 5 for a new location
-	public static int[] roomCheck = new int[16];
-	public static boolean tookMap = false;
-	public static int numberOfItemsInInventory = 0;
-	public static int numberOfItemsInGame = 21;
+												// //used
+	public static int currentLocale = 0; // Player starts in locale 0. //used
+	public static String command; // Game commands// used
+	public static String itemToTake;// used
+	public static boolean stillPlaying = true; // Controls the game loop.//used
+	public static Locale[] locations;// used
+	public static int score = 5; // score is 5 for a new location//used
+	public static int[] roomCheck = new int[16];// used
+	public static boolean tookMap = false;// used
+	public static int numberOfItemsInInventory = 0;// used
 	public static String inventory[] = new String[700];// uses booleans, Item
 														// class
-														// to make this work.
-	public static int currentLocation;
-	public static int[] inLocale = new int[25];// array that tells where the
-												// item is located
-	public static Item[] arrayOfOtherItems = new Item[25];// similar to the
-															// array of locales,
-	// location, only this one is for the
-	// items.
+														// to make this
+														// work.//used
+	public static int currentLocation;// used
 	public static int totalMoves = 0;
 	public static Money arrayOfMoney[];
 	public static int wallet[] = new int[16];// Is simlar to invetory, but is
@@ -45,84 +37,19 @@ public class game {
 	public static ListofItems lm1 = new ListofItems();
 	public static ListofLocales listForDirs = new ListofLocales();
 	public static Locale locn;
+	public static ListItem[] arrayForMagicShop = new ListItem[673];// more
+																	// clunky,
+																	// but also
+																	// more hard
 
-	public static void main(String[] args) {
-		// Make some list items.
-		for (int i = 0; i < 700; i++) {
-			inventory[i] = null;
-		}
-		ListItem item25 = new ListItem();
-		item25.setListItemName("+2 ring");
-		item25.setListItemNameDesc("precious");
-		item25.setListItemNameCost(42);
-		item25.setListItemNameNext(null); // Redundant, but safe.
-
-		ListItem item26 = new ListItem();
-		item26.setListItemName("Cloak of Doom");
-		item26.setListItemNameDesc("Scary");
-		item26.setListItemNameCost(666);
-		item26.setListItemNameNext(null); // Still redundant. Still safe.
-
-		ListItem item27 = new ListItem();
-		item27.setListItemName("broad sword");
-		item27.setListItemNameDesc("sharp");
-		item27.setListItemNameCost(12);
-		item27.setListItemNameNext(null); // Still redundant. Still safe.
-
-		ListItem item0 = new ListItem();
-		item0.setListItemName("Magical Summoning Thingy");
-		item0.setListItemNameDesc("Rumoured to be from another dimension, it can summon random creatures.");
-		item25.setListItemNameCost(728);
-		item25.setListItemNameNext(null); // Redundant, but safe.
-
-		ListItem item1 = new ListItem();
-		item1.setListItemName("Rusty Hammer");
-		item1.setListItemNameDesc("An old hammer used for hitting nails  ");
-		item25.setListItemNameCost(52);
-		item25.setListItemNameNext(null); // Redundant, but safe.
-
-		ListItem item2 = new ListItem();
-		item2.setListItemName("Wand with Low Batteries");
-		item2.setListItemNameDesc("A wand that doesnt work well, since it needs some new AA batteries");
-		item25.setListItemNameCost(14);
-		item25.setListItemNameNext(null); // Redundant, but safe.
-
-		ListItem item3 = new ListItem();
-		item3.setListItemName("Broken Sword");
-		item3.setListItemNameDesc("A sword that is missing its tip");
-		item25.setListItemNameCost(10);
-		item25.setListItemNameNext(null); // Redundant, but safe.
-
+	public static void main(String[] args) throws Exception {
+		Queue playerPathForwardQueue = new Queue();
+		Stack playerPathBackwordStack = new Stack();
 		// Make the list manager.
 		lm1.setName("Magic Items");
 		lm1.setDesc("these are what are for sale.");
-
-		// Put items in the list.
-		lm1.add(item0);
-		lm1.add(item1);
-		lm1.add(item2);
-		lm1.add(item3);
-		lm1.add(item26);
-		lm1.add(item27);
-		lm1.add(item25);
-
 		final String fileName = "magic.txt";
-		File myFile = new File(fileName);
-		try {
-			Scanner input = new Scanner(myFile);
-			while (input.hasNext()) {
-				String itemName = input.nextLine();
-				ListItem fileItem = new ListItem();
-				fileItem.setListItemName(itemName);
-				fileItem.setListItemNameDesc(null);
-				fileItem.setListItemNameCost((int) (Math.random() * 1000));
-				fileItem.setListItemNameNext(null);
-				lm1.add(fileItem);
-			}
-			input.close();
-		} catch (FileNotFoundException ex) {
-			System.out.println("File not found. " + ex.toString());
-		}
+
 		for (int i = 0; i == MAX_LOCALES - 1; i++) {
 			roomCheck[i] = 0;
 		}
@@ -140,22 +67,100 @@ public class game {
 		}
 		// Get the game started.
 		init();
-		/* System.out.println(listForDirs); */
+		readMagicItemsFromFileToArray(fileName, arrayForMagicShop);
+		selectionSort(arrayForMagicShop);
 		updateDisplay();
 		// Game Loop
+		// playerPathForwardQueue.enqueue(currentLocale);
+		// playerPathBackwordStack.push(currentLocale);
 		while (stillPlaying) {
+			playerPathForwardQueue.enqueue(currentLocale);
+			playerPathBackwordStack.push(currentLocale);
 			getCommand();
 			navigate();
 			if (stillPlaying == true) {
 				updateDisplay();
 				if (currentLocale == 1) {// print out list
-					System.out.println("Current items for sale are :\n"
-							+ lm1.toString());
+					System.out.println("Current items for sale are :\n");
+					for (int i = 0; i < arrayForMagicShop.length; i++) {
+						System.out.print(arrayForMagicShop[i]);
+					}
 				}
 			}
 		}
 		// We're done. Thank the player and exit.
+		System.out
+				.println("Would you like to review your path through the game from start to finish, forward?  y = yes, anything else = no");
+		Scanner choiceReader = new Scanner(System.in);
+		String choice = choiceReader.nextLine(); // command is global.
+		if (choice.equalsIgnoreCase("y")) {
+			for (int i = 0; i < totalMoves + 1; i++) {
+				System.out.println(sequentialSearchLocaleName(listForDirs,
+						playerPathForwardQueue.dequeue()));
+			}
+		}
+		System.out
+				.println("Would you like to review your path backwards through the game from finish to start?  y = yes, anything else = no");
+		Scanner otherChoiceReader = new Scanner(System.in);
+		String otherChoice = choiceReader.nextLine(); // command is global.
+		if (otherChoice.equalsIgnoreCase("y")) {
+			System.out.println("totalMoves = " + totalMoves);
+			for (int i = 0; i < totalMoves + 1; i++) {
+				System.out.println(sequentialSearchLocaleName(listForDirs,
+						playerPathBackwordStack.pop()));
+			}
+		}
 		System.out.println("Thank you for playing.");
+
+	}
+
+	/*--------------------------------------------------------------------------------*/
+	public static void readMagicItemsFromFileToArray(String fileName,
+			ListItem[] arrayForMagicShop) {
+		File myFile = new File(fileName);
+		try {
+			int itemCount = 7;
+			Scanner input = new Scanner(myFile);
+
+			while (input.hasNext() && itemCount < arrayForMagicShop.length) {
+				// Read a line from the file.
+				String itemName = input.nextLine();
+
+				// Construct a new list item and set its attributes.
+				ListItem fileItem = new ListItem();
+				fileItem.setListItemName(itemName);
+				fileItem.setListItemCost((int) (Math.random() * 1000));
+				fileItem.setListItemNext(null); // Still redundant. Still
+												// safe.
+
+				// Add the newly constructed item to the array.
+				arrayForMagicShop[itemCount] = fileItem;
+				itemCount = itemCount + 1;
+			}
+			// Close the file.
+			input.close();
+		} catch (FileNotFoundException ex) {
+			System.out.println("File not found. " + ex.toString());
+		}
+	}
+
+	/*--------------------------------------------------------------------------------*/
+	private static void selectionSort(ListItem[] arrayForMagicShop) {
+		for (int pass = 0; pass < arrayForMagicShop.length - 1; pass++) {
+			// System.out.println(pass + "-" + items[pass]);
+			int indexOfTarget = pass;
+			int indexOfSmallest = indexOfTarget;
+
+			for (int j = indexOfTarget + 1; j < arrayForMagicShop.length; j++) {
+				if (arrayForMagicShop[j].getListItemName().compareToIgnoreCase(
+						arrayForMagicShop[indexOfSmallest].getListItemName()) < 0) {
+					indexOfSmallest = j;
+				}
+			}
+			ListItem temp = arrayForMagicShop[indexOfTarget];
+			arrayForMagicShop[indexOfTarget] = arrayForMagicShop[indexOfSmallest];
+			arrayForMagicShop[indexOfSmallest] = temp;
+		}
 	}
 
 	/*--------------------------------------------------------------------------------*/
@@ -214,6 +219,58 @@ public class game {
 		locations[0].arrayOfItems[3].setarrayOfItemsDesc(null);
 
 		locations[1] = new Locale();
+		// item0- magical summoning thingy
+		ListItem item0 = new ListItem();
+		item0.setListItemName("Magical Summoning Thingy");
+		item0.setListItemDesc("Rumoured to be from another dimension, it can summon random creatures.");
+		item0.setListItemCost(728);
+		// item 1-- rusty hammer
+		ListItem item1 = new ListItem();
+		item1.setListItemName("Rusty Hammer");
+		item1.setListItemDesc("An old hammer used for hitting nails  ");
+		item1.setListItemCost(52);
+		item1.setListItemNext(null); // Redundant, but safe.
+		// ITEM 2 wand with low batteries
+		ListItem item2 = new ListItem();
+		item2.setListItemName("Wand with Low Batteries");
+		item2.setListItemDesc("A wand that doesnt work well, since it needs some new AA batteries");
+		item2.setListItemCost(14);
+		item2.setListItemNext(null); // Redundant, but safe.
+		// item 3 broken sword
+		ListItem item3 = new ListItem();
+		item3.setListItemName("Broken Sword");
+		item3.setListItemDesc("A sword that is missing its tip");
+		item3.setListItemCost(10);
+		item3.setListItemNext(null); // Redundant, but safe.
+		// item 25- +2 ring
+		ListItem item25 = new ListItem();
+		item25.setListItemName("+2 ring");
+		item25.setListItemDesc("precious");
+		item25.setListItemCost(42);
+		item25.setListItemNext(null); // Redundant, but safe.
+		// item 26- cloal of doom
+		ListItem item26 = new ListItem();
+		item26.setListItemName("Cloak of Doom");
+		item26.setListItemDesc("Scary");
+		item26.setListItemCost(666);
+		item26.setListItemNext(null); // Still redundant. Still safe.
+		// item 27= borad sword
+		ListItem item27 = new ListItem();
+		item27.setListItemName("broad sword");
+		item27.setListItemDesc("sharp");
+		item27.setListItemCost(12);
+		item27.setListItemNext(null); // Still redundant. Still safe.
+
+		// -- array for magic shops items
+		arrayForMagicShop[0] = item0;
+		arrayForMagicShop[1] = item1;
+		arrayForMagicShop[2] = item2;
+		arrayForMagicShop[3] = item3;
+		arrayForMagicShop[4] = item25;
+		arrayForMagicShop[5] = item26;
+		arrayForMagicShop[6] = item27;
+
+		// -- magic shop itself
 		locations[1].setName("Magick Shoppe");
 		locations[1].setId(1);
 		locations[1]
@@ -980,6 +1037,7 @@ public class game {
 				achievementRatio();
 			}
 		}
+
 	}
 
 	/*--------------------------------------------------------------------------------*/
@@ -1003,6 +1061,7 @@ public class game {
 	/*--------------------------------------------------------------------------------*/
 	private static void quit() {
 		stillPlaying = false;
+
 	}
 
 	/*--------------------------------------------------------------------------------*/
@@ -1014,7 +1073,11 @@ public class game {
 		itemToTake = inputReader.nextLine();
 		takenItem = sequentialSearchLocaleAmeliasItemsForInventory(itemToTake,
 				listForDirs, currentLocale);
-		System.out.println("You took the " + itemToTake);
+		if (takenItem == null) {
+			System.out.println("That item isn't here.");
+		} else {
+			System.out.println("You took the " + takenItem);
+		}
 		if (itemToTake.equalsIgnoreCase("map")) {
 			tookMap = true;
 		}
@@ -1024,26 +1087,41 @@ public class game {
 	}
 
 	/*--------------------------------------------------------------------------------*/
-	private static ListItem sequentialSearchItem(ListofItems lim,
-			String targetName) {
+	private static ListItem binarySearchArray(ListItem[] arrayForMagicShop,
+			String target) {
 		ListItem retVal = null;
-		int counter = 0;
+		System.out.println("Binary Searching for " + target + ".");
 		ListItem currentItem = new ListItem();
-		currentItem = lim.getHead();
 		boolean isFound = false;
-		while ((!isFound) && (currentItem != null)) {
-			counter = counter + 1;
-			if (currentItem.getListItemName().equalsIgnoreCase(targetName)) {
+		int counter = 0;
+		int low = 0;
+		int high = arrayForMagicShop.length - 1; // because 0-based arrays
+		while ((!isFound) && (low <= high)) {
+			int mid = Math.round((high + low) / 2);
+			currentItem = arrayForMagicShop[mid];
+			if (currentItem.getListItemName().equalsIgnoreCase(target)) {
+				// We found it!
 				isFound = true;
 				retVal = currentItem;
 			} else {
-				currentItem = currentItem.getListItemNameNext();
+				// Keep looking.
+				counter++;
+				if (currentItem.getListItemName().compareToIgnoreCase(target) > 0) {
+					// target is higher in the list than the currentItem (at
+					// mid)
+					high = mid - 1;
+				} else {
+					// target is lower in the list than the currentItem (at mid)
+					low = mid + 1;
+				}
 			}
 		}
 		if (isFound) {
-			return currentItem;
+			System.out.println("Found " + target + " after " + counter
+					+ " comparisons.");
 		} else {
-			System.out.println("Could not find " + targetName);
+			System.out.println("Could not find " + target + " in " + counter
+					+ " comparisons.");
 		}
 		return retVal;
 	}
@@ -1058,10 +1136,10 @@ public class game {
 				Scanner inputReader = new Scanner(System.in);
 				String itemToBuy = inputReader.nextLine();
 				ListItem tempItem = new ListItem();
-				tempItem = sequentialSearchItem(lm1, itemToBuy);
-				int purchasePrice = tempItem.getListItemNameCost();
+				tempItem = binarySearchArray(arrayForMagicShop, itemToBuy);
+				int purchasePrice = tempItem.getListItemCost();
 				System.out.println("purchasePrice = "
-						+ tempItem.getListItemNameCost());
+						+ tempItem.getListItemCost());
 				System.out.println("coinPurse = " + coinPurse
 						+ " purchasePrice = " + purchasePrice);
 				if (coinPurse >= purchasePrice) {
@@ -1071,7 +1149,6 @@ public class game {
 					inventory[numberOfItemsInInventory] = tempItem
 							.getListItemName();
 					numberOfItemsInInventory = numberOfItemsInInventory + 1;
-					lm1.removeItem(lm1, itemToBuy);
 
 				} else {
 					System.out
