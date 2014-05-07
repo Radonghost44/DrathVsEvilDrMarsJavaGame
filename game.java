@@ -1,46 +1,32 @@
 package game;
 
+// Game is won by taking the beat up engine in location 14 (Crashed Space Ship) and repairing a space ship in location 5 (Whittie's 
+//Space ship dealer
+
 import java.io.File;
-import java.text.DecimalFormat;
 import java.io.FileNotFoundException;
 // Amelia Beckham
 import java.util.Scanner;
 
-public class game {
+class game {
 	// Globals
-	public static String goodDir = ""; // used
-	public static final int MAX_LOCALES = 16; // Total number of rooms/locations
-												// //used
-	public static int currentLocale = 0; // Player starts in locale 0. //used
-	public static String command; // Game commands// used
-	public static String itemToTake;// used
-	public static boolean stillPlaying = true; // Controls the game loop.//used
-	public static Locale[] locations;// used
-	public static int score = 5; // score is 5 for a new location//used
-	public static int[] roomCheck = new int[16];// used
-	public static boolean tookMap = false;// used
-	public static int numberOfItemsInInventory = 0;// used
-	public static String inventory[] = new String[700];// uses booleans, Item
-														// class
-														// to make this
-														// work.//used
-	public static int currentLocation;// used
-	public static int totalMoves = 0;
-	public static Money arrayOfMoney[];
-	public static int wallet[] = new int[16];// Is simlar to invetory, but is
-												// used for the money
-	public static int moneyToPickUp;
-	public static int coinPurse = 0;
-	public static int numberOfMoneyInWallet = 0;
-	public static int numberOfMoneyInGame = 16;
-	public static int[] moneyInLocale = new int[16];
-	public static ListofItems lm1 = new ListofItems();
-	public static ListofLocales listForDirs = new ListofLocales();
-	public static Locale locn;
-	public static ListItem[] arrayForMagicShop = new ListItem[673];// more
-																	// clunky,
-																	// but also
-																	// more hard
+	private static String goodDir = ""; // used
+	private static final int MAX_LOCALES = 16; // Total number of
+												// rooms/locations used
+	private static int currentLocale = 0; // Player starts in locale 0. //used
+	private static String command; // Game commands// used
+	private static boolean stillPlaying = true; // Controls the game loop.//used
+	private static int score = 5; // score is 5 for a new location//used
+	private static final int[] roomCheck = new int[16];// used
+	private static boolean tookMap = false;// used
+	private static int numberOfItemsInInventory = 0;// used
+	private static final String[] inventory = new String[700];
+	private static int totalMoves = 0;
+	private static Money[] arrayOfMoney;
+	private static int coinPurse = 0;
+	private static final ListofItems lm1 = new ListofItems();
+	private static final ListofLocales listForDirs = new ListofLocales();
+	private static final ListItem[] arrayForMagicShop = new ListItem[673];// more
 
 	public static void main(String[] args) throws Exception {
 		Queue playerPathForwardQueue = new Queue();
@@ -50,6 +36,7 @@ public class game {
 		lm1.setDesc("these are what are for sale.");
 		final String fileName = "magic.txt";
 
+		// noinspection ConstantConditions
 		for (int i = 0; i == MAX_LOCALES - 1; i++) {
 			roomCheck[i] = 0;
 		}
@@ -65,20 +52,21 @@ public class game {
 				currentLocale = startLocation;
 			}
 		}
+		int oldLocation = -1;
 		// Get the game started.
 		init();
-		readMagicItemsFromFileToArray(fileName, arrayForMagicShop);
-		selectionSort(arrayForMagicShop);
+		readMagicItemsFromFileToArray(fileName);
+		selectionSort();
 		updateDisplay();
-		// Game Loop
-		// playerPathForwardQueue.enqueue(currentLocale);
-		// playerPathBackwordStack.push(currentLocale);
 		while (stillPlaying) {
-			playerPathForwardQueue.enqueue(currentLocale);
-			playerPathBackwordStack.push(currentLocale);
+			if (oldLocation != currentLocale) {
+				playerPathForwardQueue.enqueue(currentLocale);
+				playerPathBackwordStack.push(currentLocale);
+				oldLocation = currentLocale;
+			}
 			getCommand();
 			navigate();
-			if (stillPlaying == true) {
+			if (stillPlaying) {
 				updateDisplay();
 				if (currentLocale == 1) {// print out list
 					System.out.println("Current items for sale are :\n");
@@ -95,34 +83,33 @@ public class game {
 		String choice = choiceReader.nextLine(); // command is global.
 		if (choice.equalsIgnoreCase("y")) {
 			for (int i = 0; i < totalMoves + 1; i++) {
-				System.out.println(sequentialSearchLocaleName(listForDirs,
-						playerPathForwardQueue.dequeue()));
+				System.out
+						.println(sequentialSearchLocaleName(playerPathForwardQueue
+								.dequeue()));
 			}
 		}
 		System.out
 				.println("Would you like to review your path backwards through the game from finish to start?  y = yes, anything else = no");
 		Scanner otherChoiceReader = new Scanner(System.in);
-		String otherChoice = choiceReader.nextLine(); // command is global.
+		String otherChoice = otherChoiceReader.nextLine(); // command is global.
 		if (otherChoice.equalsIgnoreCase("y")) {
-			System.out.println("totalMoves = " + totalMoves);
 			for (int i = 0; i < totalMoves + 1; i++) {
-				System.out.println(sequentialSearchLocaleName(listForDirs,
-						playerPathBackwordStack.pop()));
+				System.out
+						.println(sequentialSearchLocaleName(playerPathBackwordStack
+								.pop()));
 			}
 		}
 		System.out.println("Thank you for playing.");
-
 	}
 
 	/*--------------------------------------------------------------------------------*/
-	public static void readMagicItemsFromFileToArray(String fileName,
-			ListItem[] arrayForMagicShop) {
+	private static void readMagicItemsFromFileToArray(String fileName) {
 		File myFile = new File(fileName);
 		try {
 			int itemCount = 7;
 			Scanner input = new Scanner(myFile);
 
-			while (input.hasNext() && itemCount < arrayForMagicShop.length) {
+			while (input.hasNext() && itemCount < game.arrayForMagicShop.length) {
 				// Read a line from the file.
 				String itemName = input.nextLine();
 
@@ -131,10 +118,10 @@ public class game {
 				fileItem.setListItemName(itemName);
 				fileItem.setListItemCost((int) (Math.random() * 1000));
 				fileItem.setListItemNext(null); // Still redundant. Still
-												// safe.
+				// safe.
 
 				// Add the newly constructed item to the array.
-				arrayForMagicShop[itemCount] = fileItem;
+				game.arrayForMagicShop[itemCount] = fileItem;
 				itemCount = itemCount + 1;
 			}
 			// Close the file.
@@ -145,37 +132,38 @@ public class game {
 	}
 
 	/*--------------------------------------------------------------------------------*/
-	private static void selectionSort(ListItem[] arrayForMagicShop) {
-		for (int pass = 0; pass < arrayForMagicShop.length - 1; pass++) {
+	private static void selectionSort() {
+		for (int pass = 0; pass < game.arrayForMagicShop.length - 1; pass++) {
 			// System.out.println(pass + "-" + items[pass]);
 			int indexOfTarget = pass;
 			int indexOfSmallest = indexOfTarget;
 
-			for (int j = indexOfTarget + 1; j < arrayForMagicShop.length; j++) {
-				if (arrayForMagicShop[j].getListItemName().compareToIgnoreCase(
-						arrayForMagicShop[indexOfSmallest].getListItemName()) < 0) {
+			for (int j = indexOfTarget + 1; j < game.arrayForMagicShop.length; j++) {
+				if (game.arrayForMagicShop[j].getListItemName()
+						.compareToIgnoreCase(
+								game.arrayForMagicShop[indexOfSmallest]
+										.getListItemName()) < 0) {
 					indexOfSmallest = j;
 				}
 			}
-			ListItem temp = arrayForMagicShop[indexOfTarget];
-			arrayForMagicShop[indexOfTarget] = arrayForMagicShop[indexOfSmallest];
-			arrayForMagicShop[indexOfSmallest] = temp;
+			ListItem temp = game.arrayForMagicShop[indexOfTarget];
+			game.arrayForMagicShop[indexOfTarget] = game.arrayForMagicShop[indexOfSmallest];
+			game.arrayForMagicShop[indexOfSmallest] = temp;
 		}
 	}
 
 	/*--------------------------------------------------------------------------------*/
-	public static void totalScore() {
+	private static void totalScore() {
 		if (roomCheck[currentLocale] == 0) {
 			score = score + 5;
 			roomCheck[currentLocale] = 1;
 		}
-		;
 		System.out.println("Your current score is " + score);
-	};
+	}
 
 	/*--------------------------------------------------------------------------------*/
-	public static void achievementRatio() {
-		int ar = score / totalMoves;
+	private static void achievementRatio() {
+		int ar = 0;
 		try {
 			ar = score / totalMoves;
 		} catch (java.lang.ArithmeticException bendingTheLawsOfMath) {
@@ -401,9 +389,9 @@ public class game {
 		locations[5].arrayOfItems[1] = new ListItem();
 		locations[5].arrayOfItems[1].setarrayOfItemsName("Ancient Alien");
 		locations[5].arrayOfItems[1]
-				.setarrayOfItemsDesc("A hot pink flying saucer. It has chrome trim around it and a purple interior. In other words, the girliest space ship in existence");
+				.setarrayOfItemsDesc("A hot pink flying saucer without an engine. It has chrome trim around it and a purple interior. In other words, the girliest space ship in existence");
 		locations[5].arrayOfItems[2] = new ListItem();
-		locations[5].arrayOfItems[2].setarrayOfItemsName("Benoynd Infinty");
+		locations[5].arrayOfItems[2].setarrayOfItemsName("Beyond Infinty");
 		locations[5].arrayOfItems[2]
 				.setarrayOfItemsDesc("A triangular space ship that is dark purple and has neon yellow interior.");
 		locations[5].arrayOfItems[3] = new ListItem();
@@ -754,11 +742,10 @@ public class game {
 
 	/*--------------------------------------------------------------------------------*/
 
-	private static String sequentialSearchLocaleName(ListofLocales listForDirs,
-			int currentLocation) {
+	private static String sequentialSearchLocaleName(int currentLocation) {
 		String retVal = null;
 		Locale currentItem = new Locale();
-		currentItem = listForDirs.getDirHead();
+		currentItem = game.listForDirs.getDirHead();
 		boolean isFound = false;
 		while ((!isFound) && (currentItem != null)) {
 			if ((currentItem.getId() == currentLocation)) {
@@ -776,12 +763,12 @@ public class game {
 
 	/*--------------------------------------------------------------------------------*/
 
-	private static int sequentialSearchLocaleDestination(
-			ListofLocales listForDirs, int currentLocation, String dir) {
+	private static int sequentialSearchLocaleDestination(int currentLocation,
+			String dir) {
 		int retVal = -1;
 		int counter = 0;
 		Locale currentItem = new Locale();
-		currentItem = listForDirs.getDirHead();
+		currentItem = game.listForDirs.getDirHead();
 		boolean isFound = false;
 		while ((!isFound) && (currentItem != null)) {
 			counter = counter + 1;
@@ -817,11 +804,11 @@ public class game {
 
 	/*--------------------------------------------------------------------------------*/
 	private static String sequentialSearchLocaleAmeliasItemsForInventory(
-			String itemToTake, ListofLocales listForDirs, int currentLocale) {
+			String itemToTake, int currentLocale) {
 		String retVal = null;
 		int counter = 0;
 		Locale currentItem;
-		currentItem = listForDirs.getDirHead();
+		currentItem = game.listForDirs.getDirHead();
 		boolean isFound = false;
 		while ((!isFound) && (currentItem != null)) {
 			counter = counter + 1;
@@ -858,14 +845,13 @@ public class game {
 	}
 
 	/*--------------------------------------------------------------------------------*/
-	private static String sequentialSearchLocaleAmeliasItems(
-			ListofLocales listForDirs, int currentLocation) {
+	private static String sequentialSearchLocaleAmeliasItems(int currentLocation) {
 		String retVal = "";
 		Locale currentItem;
 		int counter = 0;
-		currentItem = listForDirs.getDirHead();
+		currentItem = game.listForDirs.getDirHead();
 		boolean isFound = false;
-		boolean isInInventory = false;
+		boolean isInInventory;
 		while ((!isFound) && (currentItem != null)) {
 			if ((currentItem.getId() == currentLocation)) {
 				isFound = true;
@@ -880,7 +866,7 @@ public class game {
 							}
 						}
 					}
-					if (isInInventory == false) {
+					if (!isInInventory) {
 						counter = counter + 1;
 						retVal = retVal + currentItem.getItem0Name() + ".  "
 								+ currentItem.getItem0Description() + ".\n";
@@ -898,7 +884,7 @@ public class game {
 							}
 						}
 					}
-					if (isInInventory == false) {
+					if (!isInInventory) {
 						counter = counter + 1;
 						retVal = retVal + currentItem.getItem1Name() + ".  "
 								+ currentItem.getItem1Description() + ".\n";
@@ -916,7 +902,7 @@ public class game {
 							}
 						}
 					}
-					if (isInInventory == false) {
+					if (!isInInventory) {
 						counter = counter + 1;
 						retVal = retVal + currentItem.getItem2Name() + ".  "
 								+ currentItem.getItem2Description() + ".\n";
@@ -934,7 +920,7 @@ public class game {
 							}
 						}
 					}
-					if (isInInventory == false) {
+					if (!isInInventory) {
 						counter = counter + 1;
 						retVal = retVal + currentItem.getItem3Name() + ".  "
 								+ currentItem.getItem3Description() + ".\n";
@@ -956,15 +942,15 @@ public class game {
 		if (totalMoves == 0 && currentLocale == 0) {
 			System.out.println("Darth Vs. The Evil Dr. Mars");
 		}
-		System.out.println(sequentialSearchLocaleName(listForDirs,
-				currentLocale));
+		System.out.println(sequentialSearchLocaleName(currentLocale));
 		validMove(currentLocale);
-		String tempName = "";
-		tempName = sequentialSearchLocaleAmeliasItems(listForDirs,
-				currentLocale);
+		String tempName;
+		tempName = sequentialSearchLocaleAmeliasItems(currentLocale);
 		System.out.println(tempName);
 		System.out.println("There are "
 				+ arrayOfMoney[currentLocale].getWorth() + " Gold Coins here");
+		System.out
+				.println("----------------------------------------------------------------");
 	}
 
 	/*--------------------------------------------------------------------------------*/
@@ -1015,17 +1001,19 @@ public class game {
 		} else if (command.equalsIgnoreCase("buy")
 				|| command.equalsIgnoreCase("b")) {
 			buy();
+		} else if (command.equalsIgnoreCase("repair")
+				|| command.equalsIgnoreCase("r")) {
+			install();
 		} else {
 			System.out
 					.print("That is not a valid command. Valid commands are n(north),s(south),w(west),e(east),h(help),q(queit),t(take),i(inventory),m(map)and a(attack). Both upper and lower case are valid commands");
 		}
-		;
 
 		if (!dir.equalsIgnoreCase("INVALID")) { // This means a dir was set.
 			totalMoves = totalMoves + 1;
 			if ("nsewud".indexOf(dir) > -1) {
-				newLocation = sequentialSearchLocaleDestination(listForDirs,
-						currentLocale, dir);
+				newLocation = sequentialSearchLocaleDestination(currentLocale,
+						dir);
 			}
 			if (newLocation == -1) {
 				System.out.println("You cannot go that way. Press h for help");
@@ -1055,6 +1043,7 @@ public class game {
 		System.out.println("   i/inventory");
 		System.out.println("   m/map");
 		System.out.println("   p/pick up");
+		System.out.println("   r/repair (installs engine in rocket ship="+ \");
 		System.out.println("   q/quit");
 	}
 
@@ -1066,17 +1055,21 @@ public class game {
 
 	/*--------------------------------------------------------------------------------*/
 	private static void take() {
-		String takenItem = null;
+		String takenItem;
 		System.out.println("Which item do you wish to take?");
 
 		Scanner inputReader = new Scanner(System.in);
-		itemToTake = inputReader.nextLine();
+		String itemToTake = inputReader.nextLine();
 		takenItem = sequentialSearchLocaleAmeliasItemsForInventory(itemToTake,
-				listForDirs, currentLocale);
+				currentLocale);
 		if (takenItem == null) {
 			System.out.println("That item isn't here.");
+			System.out
+					.println("----------------------------------------------------------------");
 		} else {
 			System.out.println("You took the " + takenItem);
+			System.out
+					.println("----------------------------------------------------------------");
 		}
 		if (itemToTake.equalsIgnoreCase("map")) {
 			tookMap = true;
@@ -1087,18 +1080,17 @@ public class game {
 	}
 
 	/*--------------------------------------------------------------------------------*/
-	private static ListItem binarySearchArray(ListItem[] arrayForMagicShop,
-			String target) {
+	private static ListItem binarySearchArray(String target) {
 		ListItem retVal = null;
 		System.out.println("Binary Searching for " + target + ".");
 		ListItem currentItem = new ListItem();
 		boolean isFound = false;
 		int counter = 0;
 		int low = 0;
-		int high = arrayForMagicShop.length - 1; // because 0-based arrays
+		int high = game.arrayForMagicShop.length - 1; // because 0-based arrays
 		while ((!isFound) && (low <= high)) {
 			int mid = Math.round((high + low) / 2);
-			currentItem = arrayForMagicShop[mid];
+			currentItem = game.arrayForMagicShop[mid];
 			if (currentItem.getListItemName().equalsIgnoreCase(target)) {
 				// We found it!
 				isFound = true;
@@ -1136,7 +1128,7 @@ public class game {
 				Scanner inputReader = new Scanner(System.in);
 				String itemToBuy = inputReader.nextLine();
 				ListItem tempItem = new ListItem();
-				tempItem = binarySearchArray(arrayForMagicShop, itemToBuy);
+				tempItem = binarySearchArray(itemToBuy);
 				int purchasePrice = tempItem.getListItemCost();
 				System.out.println("purchasePrice = "
 						+ tempItem.getListItemCost());
@@ -1172,8 +1164,34 @@ public class game {
 	}
 
 	/*--------------------------------------------------------------------------------*/
+	private static void install() {
+		boolean hasEngine = false;
+		for (int i = 0; i < numberOfItemsInInventory; i++) {
+			if (inventory[i].equalsIgnoreCase("Beat Up Engine"))
+				;
+			{
+				hasEngine = true;
+			}
+		}
+		if (currentLocale != 5) {
+			System.out
+					.println("You can not install the spaceship engine here.");
+		} else {
+			if (hasEngine = false) {
+				System.out.println("You don't have the engine");
+			} else {
+				System.out
+						.println("You repaired the pink spaceship with the engine.");
+				System.out
+						.println("You climb into the spaceship.  It blasts off and takes you home.");
+				System.out.println("You have won the game!");
+				stillPlaying = false;
+			}
+		}
+	}
+
 	// inventory
-	private static String inventory() {
+	private static void inventory() {
 		int i;
 		System.out.println("You have " + numberOfItemsInInventory
 				+ " items in bag");
@@ -1184,39 +1202,33 @@ public class game {
 		System.out.println("You have " + coinPurse
 				+ " gold coins in your wallet");
 		System.out.println();
-		return inventory[i];
+
 	}
 
 	/*--------------------------------------------------------------------------------*/
-	public static void validMove(int currentLocale) {
-		int newLocationTemp = -1;
-		newLocationTemp = sequentialSearchLocaleDestination(listForDirs,
-				currentLocale, "n");
+	private static void validMove(int currentLocale) {
+		int newLocationTemp;
+		newLocationTemp = sequentialSearchLocaleDestination(currentLocale, "n");
 		if (newLocationTemp != -1) {
 			goodDir = goodDir + "north ";
 		}
-		newLocationTemp = sequentialSearchLocaleDestination(listForDirs,
-				currentLocale, "s");
+		newLocationTemp = sequentialSearchLocaleDestination(currentLocale, "s");
 		if (newLocationTemp != -1) {
 			goodDir = goodDir + "south ";
 		}
-		newLocationTemp = sequentialSearchLocaleDestination(listForDirs,
-				currentLocale, "e");
+		newLocationTemp = sequentialSearchLocaleDestination(currentLocale, "e");
 		if (newLocationTemp != -1) {
 			goodDir = goodDir + "east ";
 		}
-		newLocationTemp = sequentialSearchLocaleDestination(listForDirs,
-				currentLocale, "w");
+		newLocationTemp = sequentialSearchLocaleDestination(currentLocale, "w");
 		if (newLocationTemp != -1) {
 			goodDir = goodDir + "west ";
 		}
-		newLocationTemp = sequentialSearchLocaleDestination(listForDirs,
-				currentLocale, "u");
+		newLocationTemp = sequentialSearchLocaleDestination(currentLocale, "u");
 		if (newLocationTemp != -1) {
 			goodDir = goodDir + "up ";
 		}
-		newLocationTemp = sequentialSearchLocaleDestination(listForDirs,
-				currentLocale, "d");
+		newLocationTemp = sequentialSearchLocaleDestination(currentLocale, "d");
 		if (newLocationTemp != -1) {
 			goodDir = goodDir + "down";
 		}
@@ -1226,8 +1238,8 @@ public class game {
 
 	/*--------------------------------------------------------------------------------*/
 	// now for the ascii map and ascii art for the locales
-	public static void asciiMap() {
-		if (tookMap == true) {
+	private static void asciiMap() {
+		if (tookMap) {
 			System.out
 					.println("                              [_outer_outer_space]              [_crashed_space_ship_]             [_not_at_all_evil_blimp]");
 			System.out
