@@ -10,6 +10,7 @@ import java.util.Scanner;
 
 class game {
 	// Globals
+	public static int validMoves = 0;
 	private static String goodDir = ""; // used
 	private static final int MAX_LOCALES = 16; // Total number of
 												// rooms/locations used
@@ -27,7 +28,6 @@ class game {
 	private static final ListofItems lm1 = new ListofItems();
 	private static final ListofLocales listForDirs = new ListofLocales();
 	private static final ListItem[] arrayForMagicShop = new ListItem[673];// more
-
 	public static void main(String[] args) throws Exception {
 		Queue playerPathForwardQueue = new Queue();
 		Stack playerPathBackwordStack = new Stack();
@@ -59,7 +59,7 @@ class game {
 		selectionSort();
 		updateDisplay();
 		while (stillPlaying) {
-			if (oldLocation != currentLocale) {
+			if ((oldLocation != currentLocale)/*||(currentLocale==currentLocale)*/ ){
 				playerPathForwardQueue.enqueue(currentLocale);
 				playerPathBackwordStack.push(currentLocale);
 				oldLocation = currentLocale;
@@ -77,29 +77,23 @@ class game {
 			}
 		}
 		// We're done. Thank the player and exit.
-		System.out
-				.println("Would you like to review your path through the game from start to finish, forward?  y = yes, anything else = no");
+		System.out.println("Would you like to review your path through the game from start to finish, forward?  y = yes, anything else = no");
 		Scanner choiceReader = new Scanner(System.in);
 		String choice = choiceReader.nextLine(); // command is global.
 		if (choice.equalsIgnoreCase("y")) {
-			for (int i = 0; i < totalMoves + 1; i++) {
-				System.out
-						.println(sequentialSearchLocaleName(playerPathForwardQueue
-								.dequeue()));
-			}
-		}
-		System.out
-				.println("Would you like to review your path backwards through the game from finish to start?  y = yes, anything else = no");
+			for (int i = 0; i < validMoves+1; i++) {
+                 System.out.println(sequentialSearchLocaleName(playerPathForwardQueue.dequeue()));}// breaks after repeated location-add to queue
+			
+			
+		System.out.println("Would you like to review your path backwards through the game from finish to start?  y = yes, anything else = no");
 		Scanner otherChoiceReader = new Scanner(System.in);
 		String otherChoice = otherChoiceReader.nextLine(); // command is global.
 		if (otherChoice.equalsIgnoreCase("y")) {
-			for (int i = 0; i < totalMoves + 1; i++) {
-				System.out
-						.println(sequentialSearchLocaleName(playerPathBackwordStack
-								.pop()));
+			for (int i = 0; i < validMoves + 1; i++) {
+				System.out.println(sequentialSearchLocaleName(playerPathBackwordStack.pop()));
 			}
 		}
-		System.out.println("Thank you for playing.");
+		System.out.println("Thank you for playing.");}
 	}
 
 	/*--------------------------------------------------------------------------------*/
@@ -1019,6 +1013,7 @@ class game {
 				System.out.println("You cannot go that way. Press h for help");
 				validMove(newLocation);
 			} else {
+				validMoves = validMoves + 1;
 				currentLocale = newLocation;
 				totalScore();
 				System.out.println("You have made " + totalMoves + " moves.");
@@ -1043,7 +1038,7 @@ class game {
 		System.out.println("   i/inventory");
 		System.out.println("   m/map");
 		System.out.println("   p/pick up");
-		System.out.println("   r/repair (installs engine in rocket ship="+ \");
+		System.out.println("   r/repair (installs engine in rocket ship in Whittie's Space Ship Dealer");
 		System.out.println("   q/quit");
 	}
 
